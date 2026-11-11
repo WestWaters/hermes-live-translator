@@ -45,9 +45,17 @@ def test_the_engine_gets_only_the_key_it_needs(monkeypatch):
     assert env == {"LIVE_TRANSLATE_API_KEY": "sk-openai"}
 
 
-def test_keys_in_the_raw_environment_are_never_read(monkeypatch):
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-from-another-profile")   # catalog rule 11: only Hermes's secret scope
-    assert detect._secret("OPENAI_API_KEY") == ""
+def test_keys_come_only_from_hermes_secret_scope(monkeypatch):
+    """Catalog rule 11: the plugin asks Hermes's secret scope and never reads the environment itself (whatever
+    fallback core applies is core's decision)."""
+    import sys, types
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-from-the-raw-environment")
+    scope = types.ModuleType("agent.secret_scope")
+    scope.get_secret = lambda name: {"OPENAI_API_KEY": "sk-from-hermes"}.get(name)
+    monkeypatch.setitem(sys.modules, "agent", types.ModuleType("agent"))
+    monkeypatch.setitem(sys.modules, "agent.secret_scope", scope)
+    assert detect._secret("OPENAI_API_KEY") == "sk-from-hermes"
+    assert detect._secret("GROQ_API_KEY") == ""
 
 
 def test_hermes_model_is_offered_only_when_the_plugin_can_call_it(monkeypatch):

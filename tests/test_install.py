@@ -38,6 +38,8 @@ def test_windows_arm_asks_uv_for_native_arm_python(monkeypatch):
 
 def test_soxr_stand_in_resamples_like_soxr():
     import numpy as np
+    import pytest
+    pytest.importorskip("scipy")                          # only the Windows-on-Arm voice envs install scipy
     from live_translate.compat import soxr
     x = np.sin(np.linspace(0, 200 * np.pi, 24000)).astype(np.float32)   # 1 s at 24 kHz
     y = soxr.resample(x, 24000, 16000)
