@@ -60,8 +60,8 @@ The bundled [agent skill](skills/live-translate/SKILL.md) teaches Hermes the mod
 
 | | |
 |---|---|
-| <img src="docs/media/call.jpg" alt="Call view: two participants with live subtitles under each" width="420"> | <img src="docs/media/settings.jpg" alt="Settings: models found on this computer and in your subscriptions, and themes" width="420"> |
-| **Call view** — each side subtitled in the other's language. | **Settings** — models found automatically; nine Hermes skins or *Match my Hermes*. |
+| <img src="docs/media/call.jpg" alt="Call view: their FaceTime video and your camera, each with live subtitles" width="420"> | <img src="docs/media/settings.jpg" alt="Settings: models found on this computer and in your subscriptions, and themes" width="420"> |
+| **Call view** — your camera and their call window side by side, each subtitled in the other's language. | **Settings** — models found automatically; nine Hermes skins or *Match my Hermes*. |
 
 **In your Hermes skin.** The window follows the skin your Hermes uses (or pick any of them in Settings):
 
