@@ -11,7 +11,7 @@ A Hermes Agent plugin and desktop app. Runs on your computer.
 [![Languages](https://img.shields.io/badge/languages-100%20heard%20·%20201%20translated-c2410c)](#languages)
 [![CI](https://github.com/WestWaters/hermes-live-translator/actions/workflows/ci.yml/badge.svg)](https://github.com/WestWaters/hermes-live-translator/actions/workflows/ci.yml)
 
-<img src="docs/media/hero.jpg" alt="Live Translate translating Chinese speech into Spanish, with live captions over a flowing light ribbon" width="860">
+<img src="docs/media/hero.jpg" alt="Live Translate in the Hermes Daylight skin, translating Chinese speech into Spanish with live captions" width="860">
 
 </div>
 
