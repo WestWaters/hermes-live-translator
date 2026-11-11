@@ -63,6 +63,13 @@ The bundled [agent skill](skills/live-translate/SKILL.md) teaches Hermes the mod
 | <img src="docs/media/call.jpg" alt="Call view: two participants with live subtitles under each" width="420"> | <img src="docs/media/settings.jpg" alt="Settings: models found on this computer and in your subscriptions, and themes" width="420"> |
 | **Call view** — each side subtitled in the other's language. | **Settings** — models found automatically; nine Hermes skins or *Match my Hermes*. |
 
+**In your Hermes skin.** The window follows the skin your Hermes uses (or pick any of them in Settings):
+
+| | | |
+|---|---|---|
+| <img src="docs/media/hermes-classic.jpg" alt="Live Translate call view in the Hermes Classic skin" width="280"> | <img src="docs/media/hermes-poseidon.jpg" alt="Live Translate call view in the Hermes Poseidon skin, live captions" width="280"> | <img src="docs/media/hermes-ares.jpg" alt="Live Translate call view in the Hermes Ares skin, live captions" width="280"> |
+| Classic | Poseidon | Ares |
+
 **Calls and streams.** Choose the meeting's audio as *Listen to* (BlackHole on macOS, VB-CABLE on Windows,
 a PipeWire monitor on Linux). For two-way, pick *Live Translate* as the microphone inside Zoom / Meet / Teams.
 For streams, add the caption page (`http://127.0.0.1:7865/`) to OBS as a Browser Source.
