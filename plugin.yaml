@@ -8,7 +8,7 @@ description: >-
   virtual audio device. Speech recognition in 99 languages, translation between 201, cloned-voice output in 23.
 author: WestWaters
 license: MIT
-homepage: https://github.com/WestWaters/hermes-live-translate
+homepage: https://github.com/WestWaters/hermes-live-translator
 tags: [voice, translation, realtime, audio, local, accessibility]
 platforms:
   - macos

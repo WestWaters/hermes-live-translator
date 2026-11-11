@@ -11,4 +11,4 @@ authors = [{ name = "WestWaters" }]
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/WestWaters/hermes-live-translate"
+Homepage = "https://github.com/WestWaters/hermes-live-translator"

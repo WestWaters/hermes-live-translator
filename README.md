@@ -9,7 +9,7 @@ A Hermes Agent plugin and desktop app. Runs on your computer.
 [![Hermes plugin](https://img.shields.io/badge/Hermes%20Agent-plugin-ffbf00)](https://hermes-agent.nousresearch.com/docs/plugins)
 [![Platforms](https://img.shields.io/badge/macOS%20·%20Windows%20·%20Linux-x64%20%2B%20ARM64-555)](#install)
 [![Languages](https://img.shields.io/badge/languages-100%20heard%20·%20201%20translated-c2410c)](#languages)
-[![CI](https://github.com/WestWaters/hermes-live-translate/actions/workflows/ci.yml/badge.svg)](https://github.com/WestWaters/hermes-live-translate/actions/workflows/ci.yml)
+[![CI](https://github.com/WestWaters/hermes-live-translator/actions/workflows/ci.yml/badge.svg)](https://github.com/WestWaters/hermes-live-translator/actions/workflows/ci.yml)
 
 <img src="docs/media/hero.jpg" alt="Live Translate translating Chinese speech into Spanish, with live captions over a flowing light ribbon" width="860">
 
@@ -35,7 +35,7 @@ they hear Chinese, in **yours**. No interpreter, no subscription, nothing leavin
 ## Install
 
 ```bash
-hermes plugins install https://github.com/WestWaters/hermes-live-translate
+hermes plugins install https://github.com/WestWaters/hermes-live-translator
 hermes translate setup     # once: builds the engine for your hardware and downloads its models (~9 GB)
 ```
 
