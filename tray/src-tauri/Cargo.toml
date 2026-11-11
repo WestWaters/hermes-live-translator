@@ -1,0 +1,16 @@
+[package]
+name = "live-translate-tray"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png", "macos-private-api"] }
+
+[profile.release]
+strip = true
+lto = true
+opt-level = "s"

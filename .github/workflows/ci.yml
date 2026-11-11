@@ -1,0 +1,55 @@
+name: tests
+
+# The plugin against current Hermes core, on Linux, macOS and Windows -- the way Nous's official plugins are
+# tested. The nightly run catches a core change that breaks the plugin before a user does.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "41 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Allow long paths (hermes-agent's docs tree exceeds MAX_PATH)
+        if: runner.os == 'Windows'
+        run: git config --system core.longpaths true
+      - uses: actions/checkout@v4
+        with:
+          path: live-translate
+      - uses: actions/checkout@v4
+        with:
+          repository: NousResearch/hermes-agent
+          path: hermes-agent
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install hermes-agent (with core's dependency overrides, as Hermes installs itself)
+        shell: bash
+        run: |
+          python -m pip install uv
+          python -c 'import sys,tomllib; print("\n".join(tomllib.load(open(sys.argv[1], "rb")).get("tool", {}).get("uv", {}).get("override-dependencies", [])))' hermes-agent/pyproject.toml > "$RUNNER_TEMP/core-overrides.txt"
+          pyexe=$(python -c 'import sys; print(sys.executable)')
+          python -m uv pip install --python "$pyexe" --override "$RUNNER_TEMP/core-overrides.txt" -e ./hermes-agent pytest numpy pyyaml
+      - name: Validate the plugin against core
+        shell: bash
+        run: python -m hermes_cli.main plugins validate live-translate
+        env:
+          HERMES_HOME: ${{ runner.temp }}/hermes-home
+          PYTHONPATH: ${{ github.workspace }}/hermes-agent
+      - name: Run the plugin suite
+        working-directory: live-translate
+        env:
+          HERMES_AGENT_REPO: ${{ github.workspace }}/hermes-agent
+          PYTHONPATH: ${{ github.workspace }}/hermes-agent
+        run: python -m pytest -q

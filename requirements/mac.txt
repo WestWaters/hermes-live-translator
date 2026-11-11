@@ -1,0 +1,15 @@
+# The translation engine runs in its own virtual environment under the plugin's data folder
+# (created by `hermes translate setup`), so none of this touches Hermes's own environment.
+mlx>=0.32,<0.40
+mlx-lm>=0.32,<0.40
+mlx-whisper>=0.4.3,<0.5
+mlx-audio>=0.6.4,<0.7
+silero-vad>=6.2,<7
+onnxruntime>=1.31,<2
+sounddevice>=0.5,<0.6
+soundfile>=0.14,<0.15
+numpy>=2.5,<3
+pykakasi>=2.3,<3          # Japanese readings for the voice model (GPL-3.0, used only inside the engine process)
+spacy-pkuseg>=1.0,<1.1    # Chinese word segmentation for the voice model
+sherpa-onnx>=2.0,<3     # who is speaking (speaker voiceprints), Apache-2.0
+livekit>=1.2,<2            # echo cancellation (WebRTC AEC3 + noise suppression), Apache-2.0

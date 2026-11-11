@@ -1,0 +1,40 @@
+name: live-translate
+version: 0.1.0
+manifest_version: 2
+api_version: 1
+description: >-
+  Real-time speech-to-speech translation, fully local. Anyone speaks in any language; you hear them in yours,
+  in their own voice, about two to three seconds behind. Works on a microphone, or on a meeting / stream through a
+  virtual audio device. Speech recognition in 99 languages, translation between 201, cloned-voice output in 23.
+author: WestWaters
+license: MIT
+homepage: https://github.com/WestWaters/hermes-live-translate
+tags: [voice, translation, realtime, audio, local, accessibility]
+platforms:
+  - macos
+  - windows
+  - linux
+python_runtime: external
+external_dependencies:
+  - name: uv
+    check: "uv --version"
+    install: "pip install uv"
+requires_hermes: ">=0.22.0"
+provides_hooks:
+  - on_session_finalize        # stops the engine when the Hermes session that started it ends
+provides_tools:
+  - translate_start
+  - translate_stop
+  - translate_status
+  - translate_languages
+config_schema:
+  target_language: {type: str, default: "en", description: "Language you want to hear (code or name)"}
+  voice_clone: {type: bool, default: true, description: "Speak translations in the speaker's own voice"}
+  input_device: {type: str, default: "", description: "Input device (empty = default microphone; 'BlackHole 2ch' = a meeting's audio)"}
+  output_device: {type: str, default: "", description: "Output device (empty = speakers; 'BlackHole 2ch' = virtual mic for Zoom/Meet/OBS)"}
+  voices: {type: str, default: "commercial", label: "Voices", description: "Voice preset ('commercial' = free for any use, the default; 'best' adds OmniVoice natural voices in 600+ languages, CC-BY-NC-4.0, non-commercial) or a route, e.g. '*=elevenlabs:eleven_flash_v2_5' or 'ja=mlx-audio:<repo>; *=command:my-tts {text} {out_wav}'"}
+  recognizer: {type: str, default: "auto", description: "Speech recognition: 'auto', 'whisper', or a route like '*=mlx-audio:<repo>' (Nemotron, Parakeet...) or '*=openai:<url>#<model>'"}
+  translator: {type: str, default: "", description: "Translation model: empty = built-in Qwen3.5-4B; 'mlx:<repo>' or 'openai:<url>#<model>' (Ollama, LM Studio, a subscription)"}
+  elevenlabs_api_key: {type: secret, env: ELEVENLABS_API_KEY, label: "ElevenLabs API key", description: "Optional: your ElevenLabs key, for '*=elevenlabs:...' voices"}
+  openai_api_key: {type: secret, env: LIVE_TRANSLATE_API_KEY, label: "API key for your own server", description: "Optional: key for an OpenAI-compatible translator / voice / recognizer you point at"}
+  allow_remote_start: {type: bool, default: false, label: "Allow starting from chat apps", description: "Let a chat app (Telegram, ...) or a scheduled job start translation on this computer's microphone and speakers. Off: only Hermes on this computer can."}

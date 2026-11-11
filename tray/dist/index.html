@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Live Translate</title>
+<style>html,body{height:100%;margin:0;background:#05040a;border-radius:12px;overflow:hidden;color:rgba(246,241,236,.6);font:15px system-ui,sans-serif;display:grid;place-items:center;text-align:center}
+b{color:#f6f1ec;display:block;font-size:18px;margin-bottom:6px}</style></head><body>
+<div><b>Starting Live Translate…</b><span id="m">Waiting for the translator on this computer.</span></div>
+<script>
+// The control window is served by the Hermes plugin on 127.0.0.1:7865; the tray starts it if needed.
+const URL_ = "http://127.0.0.1:7865/app";
+let tries = 0;
+(function wait() {
+  fetch("http://127.0.0.1:7865/api/state", { mode: "no-cors" })
+    .then(() => { location.replace(URL_); })
+    .catch(() => {
+      if (++tries === 40) document.getElementById("m").textContent =
+        "Still waiting. Make sure Hermes is installed and the live-translate plugin is enabled (hermes translate serve).";
+      setTimeout(wait, 500);
+    });
+})();
+</script></body></html>

@@ -1,0 +1,14 @@
+# Windows / Linux engine (NVIDIA GPU or CPU). torch comes from the PyTorch index setup picks for the hardware.
+numpy>=2.0,<3
+soundfile>=0.13,<0.15
+sounddevice>=0.5,<0.6
+silero-vad>=6.2,<7
+onnxruntime>=1.20,<2
+faster-whisper>=1.2,<2; sys_platform != 'win32' or platform_machine != 'ARM64'
+transformers>=4.57,<6; sys_platform == 'win32' and platform_machine == 'ARM64'   # Whisper on PyTorch: CTranslate2 has no Windows-on-Arm build
+huggingface_hub>=0.30,<3
+nvidia-cublas-cu12>=12.4,<13; platform_machine == 'x86_64' or platform_machine == 'AMD64'
+nvidia-cudnn-cu12>=9,<10; platform_machine == 'x86_64' or platform_machine == 'AMD64'
+sherpa-onnx>=2.0,<3     # who is speaking (speaker voiceprints), Apache-2.0
+psutil>=5.9,<8              # memory guard on Windows/Linux, BSD-3
+livekit>=1.2,<2            # echo cancellation (WebRTC AEC3 + noise suppression), Apache-2.0

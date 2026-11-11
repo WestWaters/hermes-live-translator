@@ -1,0 +1,14 @@
+[project]
+name = "hermes-live-translate"
+version = "0.1.0"
+description = "Real-time speech-to-speech translation for Hermes Agent, on your computer."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [{ name = "WestWaters" }]
+# The plugin itself needs nothing beyond Hermes. The translation engine runs in its own environment that
+# `hermes translate setup` builds (requirements/ per platform), so it never touches Hermes's environment.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/WestWaters/hermes-live-translate"
