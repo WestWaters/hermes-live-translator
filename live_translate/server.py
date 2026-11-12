@@ -4,15 +4,18 @@
   /app           the control window (the tray app and Hermes Desktop open this)
   /api/...       state, start, stop, setup, devices, languages -- what the window drives
 
-Changing requests need the per-run token the server writes into /app, and a same-origin (or no) Origin header, so
-a web page in the user's browser cannot start or stop translation.
+Every request must name this server exactly in its Host header (127.0.0.1 or localhost with this port), so a web page
+re-pointing its own domain at 127.0.0.1 (DNS rebinding) is refused. Every /api route and /events also needs the token,
+which lives in plugin-data/live-translate/server.token (owner-only) and reaches the pages in the URL fragment
+(#t=...) -- never in a page's HTML. Changing requests also need a same-origin (or no) Origin header.
 
-Live captions page: http://127.0.0.1:<port>/ shows the original and the translation as they happen.
+Live captions page: http://127.0.0.1:<port>/#t=<token> shows the original and the translation as they happen.
 
 Add it to OBS as a Browser Source for bilingual subtitles on a stream, or open it next to a meeting. Local only
 (binds 127.0.0.1), standard library only."""
 from __future__ import annotations
 
+import hmac
 import json
 import os
 import secrets
@@ -51,7 +54,7 @@ const bar=new URLSearchParams(location.search).has("bar");if(bar)document.docume
 const wrap=document.getElementById('wrap'),lag=document.getElementById('lag'),idle=document.getElementById('idle');
 const N=+(new URLSearchParams(location.search).get('lines')||(bar?2:3));
 document.getElementById('close').onclick=()=>{const T=window.__TAURI__;if(T&&T.window)T.window.getCurrentWindow().close();else window.close();};
-const es=new EventSource('/events');
+const tk=new URLSearchParams(location.hash.slice(1)).get('t')||'';const es=new EventSource('/events?t='+encodeURIComponent(tk));
 es.onmessage=e=>{const d=JSON.parse(e.data);
  if(d.lag!=null)lag.textContent='delay '+d.lag.toFixed(1)+' s';
  if(!d.caption)return;idle.style.display='none';const c=d.caption,el=document.createElement('div');el.className='c';
@@ -61,7 +64,25 @@ es.onmessage=e=>{const d=JSON.parse(e.data);
 </script></body></html>"""
 
 
-TOKEN = secrets.token_urlsafe(24)
+def _token():
+    """This computer's server token: created once, owner-only, reused so an OBS Browser Source link keeps working."""
+    from .paths import data_dir
+    f = data_dir() / "server.token"
+    try:
+        t = f.read_text().strip()
+        if len(t) >= 32:
+            return t
+    except OSError:
+        pass
+    t = secrets.token_urlsafe(32)
+    fd = os.open(str(f), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as fh:
+        fh.write(t)
+    return t
+
+
+TOKEN = _token()
+FONTS = Path(__file__).resolve().parent.parent / "app" / "fonts"
 ROOT = Path(__file__).resolve().parent.parent
 APP = ROOT / "app" / "index.html"
 
@@ -74,8 +95,7 @@ def _app_page():
     from lt_engine import langs
     rows = [[c, n, 1 if (c in langs.FAST_CLONE or c in langs.CLONE_LANGS) else 0]
             for c, n in sorted(langs.NAMES.items(), key=lambda kv: kv[1])]
-    return (APP.read_text().replace("__LANGS__", json.dumps(rows, ensure_ascii=False))
-            .replace('"__TOKEN__"', json.dumps(TOKEN)))
+    return APP.read_text().replace("__LANGS__", json.dumps(rows, ensure_ascii=False))   # token: URL fragment only
 
 
 def serve(session, port=7865, actions=None):
@@ -84,6 +104,21 @@ def serve(session, port=7865, actions=None):
     actions = actions or {}
 
     class H(BaseHTTPRequestHandler):
+        port = 0                                          # set once the socket is bound
+
+        def _host_ok(self):
+            """Only requests addressed to this server by name: defeats DNS rebinding."""
+            return self.headers.get("Host", "") in (f"127.0.0.1:{self.port}", f"localhost:{self.port}")
+
+        def _origin_ok(self):
+            o = self.headers.get("Origin")
+            return o is None or o in (f"http://127.0.0.1:{self.port}", f"http://localhost:{self.port}")
+
+        def _authed(self):
+            from urllib.parse import parse_qs, urlparse
+            given = self.headers.get("X-LT-Token") or (parse_qs(urlparse(self.path).query).get("t") or [""])[0]
+            return hmac.compare_digest(given.encode(), TOKEN.encode())
+
         def log_message(self, fmt, *a):
             if os.environ.get("LT_HTTP_LOG"):
                 import sys
@@ -100,19 +135,19 @@ def serve(session, port=7865, actions=None):
             self.wfile.write(data)
 
         def do_POST(self):
+            if not self._host_ok():
+                return self._send(403, {"error": "forbidden"})
             origin = self.headers.get("Origin")
             if self.path == "/v1/chat/completions":         # the engine translating with Hermes's own model
-                if origin or self.headers.get("Authorization") != f"Bearer {TOKEN}" or "llm" not in actions:
+                if origin or not hmac.compare_digest(self.headers.get("Authorization", "").encode(),
+                                                     f"Bearer {TOKEN}".encode()) or "llm" not in actions:
                     return self._send(403, {"error": "forbidden"})   # local processes only, never a web page
                 n = int(self.headers.get("Content-Length") or 0)
                 try:
                     return self._send(200, actions["llm"](json.loads(self.rfile.read(n) or b"{}")))
                 except Exception as e:
                     return self._send(502, {"error": {"message": str(e)[:300]}})
-            host = self.headers.get("Host", "")
-            if self.headers.get("X-LT-Token") != TOKEN or (origin and origin not in (f"http://{host}", "null",
-                                                                                     "tauri://localhost",
-                                                                                     "http://tauri.localhost")):
+            if not self.headers.get("X-LT-Token") or not self._authed() or not self._origin_ok():
                 return self._send(403, {"error": "forbidden"})
             n = int(self.headers.get("Content-Length") or 0)
             try:
@@ -128,9 +163,19 @@ def serve(session, port=7865, actions=None):
                 return self._send(500, {"error": str(e)[:300]})
 
         def do_GET(self):
+            if not self._host_ok() or not self._origin_ok():
+                return self._send(403, {"error": "forbidden"})
             path = self.path.split("?")[0]
-            if path == "/app":
+            if path == "/app":                            # the page shell holds no secret; it reads #t=...
                 return self._send(200, _app_page(), "text/html")
+            if path.startswith("/fonts/"):                # bundled fonts: nothing is fetched from the internet
+                name = path[len("/fonts/"):]
+                f = FONTS / name
+                if "/" in name or ".." in name or not name.endswith(".woff2") or not f.is_file():
+                    return self._send(404, {"error": "not found"})
+                return self._send(200, f.read_bytes(), "font/woff2")
+            if (path.startswith("/api/") or path == "/events") and not self._authed():
+                return self._send(403, {"error": "forbidden"})
             if path == "/api/state":
                 return self._send(200, session.status(4))
             if path in ("/api/devices", "/api/languages", "/api/hermes-skin", "/api/models") and path[5:] in actions:
@@ -138,7 +183,7 @@ def serve(session, port=7865, actions=None):
                     return self._send(200, actions[path[5:]]({}))
                 except Exception as e:
                     return self._send(500, {"error": str(e)[:300]})
-            if self.path.startswith("/events"):
+            if path == "/events":
                 self.send_response(200)
                 self.send_header("Content-Type", "text/event-stream")
                 self.send_header("Cache-Control", "no-cache")
@@ -174,7 +219,7 @@ def serve(session, port=7865, actions=None):
     for p in range(port, port + 20):                      # next free port if 7865 is taken
         try:
             srv = ThreadingHTTPServer(("127.0.0.1", p), H)
-            port = p
+            port = H.port = p
             break
         except OSError:
             continue

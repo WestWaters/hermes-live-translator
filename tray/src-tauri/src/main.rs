@@ -24,11 +24,34 @@ const LIVE: [&[u8]; 6] = [
     include_bytes!("../tray-icons/live4.png"), include_bytes!("../tray-icons/live5.png"),
 ];
 
+/// Hermes's home: HERMES_HOME, else %LOCALAPPDATA%\hermes on Windows, else ~/.hermes.
+fn hermes_home() -> Option<std::path::PathBuf> {
+    if let Some(h) = std::env::var_os("HERMES_HOME") {
+        return Some(h.into());
+    }
+    #[cfg(windows)]
+    {
+        if let Some(l) = std::env::var_os("LOCALAPPDATA") {
+            return Some(std::path::PathBuf::from(l).join("hermes"));
+        }
+    }
+    std::env::var_os("HOME").map(|h| std::path::PathBuf::from(h).join(".hermes"))
+}
+
+/// The plugin's server token (owner-only file in its data folder); every API call needs it.
+fn token() -> Option<String> {
+    let t = std::fs::read_to_string(hermes_home()?.join("plugin-data").join("live-translate").join("server.token")).ok()?;
+    let t = t.trim().to_string();
+    (t.len() >= 32 && t.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')).then_some(t)
+}
+
 /// Is the translator live (microphone in use)? Reads the local control server's state.
 fn is_live() -> bool {
+    let Some(tok) = token() else { return false };
     let Ok(mut s) = TcpStream::connect_timeout(&ADDR.parse().unwrap(), Duration::from_millis(300)) else { return false };
     let _ = s.set_read_timeout(Some(Duration::from_millis(800)));
-    if s.write_all(b"GET /api/state HTTP/1.0\r\nHost: 127.0.0.1\r\n\r\n").is_err() {
+    let req = format!("GET /api/state HTTP/1.0\r\nHost: {ADDR}\r\nX-LT-Token: {tok}\r\n\r\n");
+    if s.write_all(req.as_bytes()).is_err() {
         return false;
     }
     let mut body = String::new();
@@ -88,7 +111,14 @@ fn show(app: &AppHandle) {
         let _ = w.set_focus();
         return;
     }
-    let builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
+    // The plugin's own window page, with the token in the fragment (the page clears it from the address bar).
+    // Without the plugin running (or set up) the bundled copy shows a preview.
+    let url = match (server_up(), token()) {
+        (true, Some(t)) => format!("http://{ADDR}/app#t={t}").parse().map(WebviewUrl::External).ok(),
+        _ => None,
+    }
+    .unwrap_or_else(|| WebviewUrl::App("index.html".into()));
+    let builder = WebviewWindowBuilder::new(app, "main", url)
         .title("Live Translate")
         .inner_size(1200.0, 800.0)
         .min_inner_size(440.0, 600.0);

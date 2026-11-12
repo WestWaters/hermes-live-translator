@@ -72,7 +72,7 @@ The bundled [agent skill](skills/live-translate/SKILL.md) teaches Hermes the mod
 
 **Calls and streams.** Choose the meeting's audio as *Listen to* (BlackHole on macOS, VB-CABLE on Windows,
 a PipeWire monitor on Linux). For two-way, pick *Live Translate* as the microphone inside Zoom / Meet / Teams.
-For streams, add the caption page (`http://127.0.0.1:7865/`) to OBS as a Browser Source.
+For streams, add the caption page to OBS as a Browser Source: use the link Live Translate prints when it starts (`http://127.0.0.1:7865/#t=…`, it carries this computer's private token).
 
 ## Models and subscriptions
 
@@ -128,9 +128,11 @@ What Live Translate does on your computer, before you install it:
 | **Transcripts** | Each session's captions (what was heard and its translation) are saved to `plugin-data/live-translate/sessions/*.jsonl` in your Hermes home. Delete them any time. |
 | **Network** | None while translating with built-in or local models. If you pick a cloud model or voice (OpenAI, Gemini, OpenRouter, Groq, Anthropic, ElevenLabs), that service receives the session's text or audio with your key. *My Hermes model* sends text through Hermes to the model you already use. |
 | **Keys** | Read only through Hermes's secret store, and handed only to the part that needs them. |
-| **Downloads (setup only)** | Model weights from their official Hugging Face repos, into the standard Hugging Face cache (`~/.cache/huggingface`, or `HF_HOME`), 6-9 GB. Python packages from PyPI, PyTorch's index (Windows/Linux) and llama.cpp's prebuilt-wheel index (abetlen.github.io). uv from PyPI into the plugin's data folder if it is not installed. Nothing is downloaded while translating. |
+| **ElevenLabs voices (optional)** | Only if you pick ElevenLabs: each speaker's ~5-second voice sample is uploaded to ElevenLabs to create a cloned voice in your account. Live Translate deletes that voice when the speaker changes and when translation stops. |
+| **The window** | Loads nothing from the internet: its fonts (SIL Open Font License) ship with the plugin. |
+| **Downloads (setup only)** | Model weights from their official Hugging Face repos, into the standard Hugging Face cache (`~/.cache/huggingface`, or `HF_HOME`), 6-9 GB. Python packages from PyPI, PyTorch's index (Windows/Linux), NVIDIA's PyTorch index for Windows on Arm (pypi.nvidia.com) and llama.cpp's prebuilt-wheel index (abetlen.github.io). uv from PyPI into the plugin's data folder if it is not installed. Nothing is downloaded while translating. |
 | **Files** | The engine and its environments: `plugin-data/live-translate` in your Hermes home. |
-| **Background processes** | The engine and its voice workers run while translating and stop on *Stop* or when the Hermes session that started them ends. A local server on `127.0.0.1:7865` (this computer only) serves the window and caption page; changes need a per-run token and a same-origin request; the endpoint for *My Hermes model* accepts only local processes holding that token. |
+| **Background processes** | The engine and its voice workers run while translating and stop on *Stop* or when the Hermes session that started them ends. They get a minimal environment plus only the key of the service you picked. A local server on `127.0.0.1:7865` (this computer only) serves the window and caption page: it answers only requests addressed to `127.0.0.1`/`localhost` on its own port (so a website re-pointing its domain at your computer is refused), every API call needs this computer's token (kept owner-only in `plugin-data/live-translate/server.token` and passed to the pages in the link's `#t=` fragment, never inside a page), and the window can only pick models Live Translate found on this computer. The endpoint for *My Hermes model* accepts only local processes holding that token. |
 | **Safety** | Translation stops itself if the computer runs critically low on memory or disk. |
 | **Model licences** | Recognition, translation and the default voices are Apache-2.0 / MIT. Echo cancellation is WebRTC (BSD) via LiveKit (Apache-2.0). On CPU-only machines the Kokoro voices read text with espeak-ng (GPL-3.0), installed from PyPI. The default voices are free for any use, including commercial. The optional *Best* preset adds OmniVoice (natural voices in 600+ languages), which is **CC-BY-NC-4.0**: personal and research use only. |
 

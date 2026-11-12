@@ -88,8 +88,12 @@ def main(argv=None):
     back = None
     if a.two_way:
         back = FileSource(a.my_file, realtime=not a.fast) if a.my_file else MicSource(dev(a.my_mic))
-    p.run(source, sink_play=not a.no_play, out_device=dev(a.out_device), record=a.record, original=original,
-          stop=stop, back_source=back, back_out_device=dev(a.to_them))
+    try:
+        p.run(source, sink_play=not a.no_play, out_device=dev(a.out_device), record=a.record, original=original,
+              stop=stop, back_source=back, back_out_device=dev(a.to_them))
+    finally:
+        from .voices import close_all                       # e.g. delete ElevenLabs voices cloned this session
+        close_all()
     return 0
 
 

@@ -9,7 +9,7 @@ import threading
 import time
 from collections import deque
 
-from .paths import HERE, data_dir, is_set_up, venv_python
+from .paths import HERE, child_env, data_dir, is_set_up, venv_python
 
 
 class Session:
@@ -34,6 +34,11 @@ class Session:
             from .handlers import _actions
             self.overlay_url, self._srv = server.serve(self, actions=_actions())
         return self.overlay_url
+
+    def _captions_page(self):
+        """The caption page link for OBS / a browser: the token rides in the fragment (never sent in a request line)."""
+        from .server import TOKEN
+        return (self.overlay_url or "").rstrip("/") + "/#t=" + TOKEN
 
     @property
     def running(self):
@@ -91,9 +96,9 @@ class Session:
         sessions = data_dir() / "sessions"
         sessions.mkdir(exist_ok=True)
         self.log_path = sessions / time.strftime("%Y%m%d-%H%M%S.jsonl")
-        env = dict(os.environ, PYTHONPATH=str(HERE), PYTHONUNBUFFERED="1",
-                   LIVE_TRANSLATE_ENVS=os.environ.get("LIVE_TRANSLATE_ENVS", str(data_dir() / "envs")))
-        env.update({k: v for k, v in (secrets or {}).items() if v})     # the user's own subscriptions
+        env = child_env({"PYTHONPATH": str(HERE), "PYTHONUNBUFFERED": "1",          # minimal env + only the keys
+                         "LIVE_TRANSLATE_ENVS": os.environ.get("LIVE_TRANSLATE_ENVS", str(data_dir() / "envs"))},
+                        keys=secrets)                                              # the selected services need
         flags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0   # lets stop() send Ctrl-Break
         self.proc = subprocess.Popen(cmd, cwd=str(HERE), env=env, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
                                      creationflags=flags,
@@ -107,7 +112,7 @@ class Session:
             pass
         self.info = {"target": target, "source": source or "auto", "started": time.time(),
                      "input": input_file or input_device or "default microphone", "output": output_device or "speakers",
-                     "captions_page": self.overlay_url}
+                     "captions_page": self._captions_page()}
         threading.Thread(target=self._read, daemon=True).start()
         return {"ok": True, **self.info, "state": self.state.snapshot()}
 
@@ -213,7 +218,7 @@ def devices():
     if not is_set_up():
         return {"devices": []}
     out = subprocess.run([str(venv_python()), "-m", "lt_engine", "--list-devices"], cwd=str(HERE),
-                         env=dict(os.environ, PYTHONPATH=str(HERE)), capture_output=True, text=True, timeout=60).stdout
+                         env=child_env({"PYTHONPATH": str(HERE)}), capture_output=True, text=True, timeout=60).stdout
     return json.loads(out.strip().splitlines()[-1]) if out.strip() else {"devices": []}
 
 

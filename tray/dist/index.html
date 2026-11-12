@@ -1,18 +1,767 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Live Translate</title>
-<style>html,body{height:100%;margin:0;background:#05040a;border-radius:12px;overflow:hidden;color:rgba(246,241,236,.6);font:15px system-ui,sans-serif;display:grid;place-items:center;text-align:center}
-b{color:#f6f1ec;display:block;font-size:18px;margin-bottom:6px}</style></head><body>
-<div><b>Starting Live Translate…</b><span id="m">Waiting for the translator on this computer.</span></div>
+<title>Live Translate</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+/* Fonts ship with the plugin (served from /fonts/): the window never loads anything from the internet. */
+/* Bundled (SIL Open Font License 1.1): Instrument Sans, Atkinson Hyperlegible Next, Geist Mono. */
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/atkinson-hyperlegible-next-latin-ext-0.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/atkinson-hyperlegible-next-latin-1.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/atkinson-hyperlegible-next-latin-ext-0.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/atkinson-hyperlegible-next-latin-1.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/atkinson-hyperlegible-next-latin-ext-0.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/atkinson-hyperlegible-next-latin-1.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/geist-mono-latin-ext-2.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/geist-mono-latin-3.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/geist-mono-latin-ext-2.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/geist-mono-latin-3.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/instrument-sans-latin-ext-4.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/instrument-sans-latin-5.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/instrument-sans-latin-ext-4.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/instrument-sans-latin-5.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/instrument-sans-latin-ext-4.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/instrument-sans-latin-5.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/instrument-sans-latin-ext-4.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/instrument-sans-latin-5.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+</style>
+<style>
+/* Layout: a dark WebGL "voice as light" stage fills the window. Glass layers float on it: top bar, the language
+   bridge (two portals joined by the light ribbon), the caption theatre, and the dock with the mic orb.
+   Committed single dark look -- the light is the subject. Palette: obsidian night + warm aurora (ember, gold, rose,
+   violet). No cyan. */
+:root {
+  --night: #05040a;
+  --ink: #f6f1ec;
+  --ink-2: rgba(246, 241, 236, 0.66);
+  --ink-3: rgba(246, 241, 236, 0.42);
+  --ember: #ff6a3d;
+  --gold: #ffc46b;
+  --rose: #ff4f86;
+  --violet: #8b5cf6;
+  --glass: rgba(22, 18, 30, 0.42);
+  --glass-strong: rgba(18, 14, 26, 0.62);
+  --edge: rgba(255, 236, 220, 0.16);
+  --edge-hi: rgba(255, 244, 232, 0.34);
+  --ok: #57d9a3;
+  --display: "Instrument Sans", "SF Pro Display", "Segoe UI Variable Display", system-ui, sans-serif;
+  --ui: "Instrument Sans", system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --cap: "Atkinson Hyperlegible Next", "Noto Sans SC", "Noto Sans Arabic", "Noto Sans Devanagari", system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --head: url("data:image/png;base64,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");
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--night); color: var(--ink); font: 14px/1.45 var(--ui); -webkit-font-smoothing: antialiased; overflow: hidden; }
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 10px; }
+svg { display: block; }
+#sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block;
+  background: radial-gradient(80% 60% at 30% 60%, #2a0f1f 0%, transparent 60%), radial-gradient(70% 50% at 75% 40%, #1d1236 0%, transparent 60%), var(--night); }
+.grain { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+/* Glass recipe: one, used everywhere. */
+.glass { background: var(--glass); border: 1px solid var(--edge); border-radius: 22px;
+  backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+  box-shadow: inset 0 1px 0 var(--edge-hi), 0 24px 60px rgba(0, 0, 0, 0.45); }
+
+.shell { position: relative; z-index: 2; height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  padding-inline: clamp(16px, 3vw, 40px); padding-block: 18px 22px; gap: 14px; }
+
+/* Top bar */
+.top { display: flex; align-items: center; gap: 16px; }
+.winctl { display: none; gap: 8px; align-items: center; margin-right: 6px; }
+.in-app .winctl { display: flex; }
+.winctl button { width: 13px; height: 13px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--ink) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 18%, transparent); }
+.winctl button svg { width: 7px; height: 7px; opacity: 0; color: var(--night); transition: opacity .15s; }
+.winctl:hover button svg { opacity: .85; }
+.winctl:hover .wc-close { background: var(--ember); } .winctl:hover .wc-min { background: var(--gold); }
+.winctl:hover .wc-zoom { background: color-mix(in srgb, var(--gold) 45%, var(--ink)); }
+.in-app .top { padding-top: 2px; }
+html.in-app, html.in-app body { background: transparent; }
+html.in-app body { clip-path: inset(0 round 12px); }
+html.in-app .shell { border-radius: 12px; box-shadow: inset 0 0 0 1px var(--edge); }
+.mark { display: flex; align-items: center; gap: 10px; }
+.mark .head { width: 38px; height: 38px; flex: none; background: linear-gradient(140deg, var(--gold), var(--ember));
+  -webkit-mask: var(--head) center / contain no-repeat; mask: var(--head) center / contain no-repeat;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--ember) 45%, transparent)); }
+.mark b { font: 700 17px var(--display); letter-spacing: -0.02em; }
+.mark small { display: block; font: 500 11px var(--ui); color: var(--ink-3); letter-spacing: .02em; margin-top: 1px; }
+.top { position: relative; }
+.modes { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  gap: 2px; padding: 5px; border-radius: 999px; box-sizing: border-box; }
+.top .livechip { margin-left: auto; }
+.modes button { border: 0; background: none; padding: 8px 20px; min-width: 112px; text-align: center; border-radius: 999px; color: var(--ink-2); font-weight: 600; cursor: pointer;
+  transition: color .2s var(--ease), background .2s var(--ease); }
+.modes button[aria-pressed="true"] { color: #1a1418; background: var(--pill, linear-gradient(180deg, #fff6ee, #ffd9c2)); box-shadow: 0 6px 18px rgba(255, 106, 61, 0.28); }
+.modes button:hover:not([aria-pressed="true"]) { color: var(--ink); }
+.livechip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; font: 600 12px var(--mono); letter-spacing: .08em; color: var(--ink-2); }
+.livechip i { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+.livechip[data-on] { color: var(--ink); } .livechip[data-on] i { background: var(--ember); animation: ping 1.6s infinite; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ember) 70%, transparent); } 70%, 100% { box-shadow: 0 0 0 8px transparent; } }
+.iconbtn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 14px; cursor: pointer; color: var(--ink-2); border: 1px solid var(--edge); background: var(--glass);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.iconbtn:hover { color: var(--ink); border-color: var(--edge-hi); }
+.iconbtn svg { width: 18px; height: 18px; }
+
+/* Stage */
+.stage { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: clamp(14px, 2.4vh, 26px); align-content: start; padding-top: clamp(4px, 2vh, 24px); }
+.bridge { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: clamp(12px, 3vw, 48px); max-width: 1080px; width: 100%; margin-inline: auto; }
+.portal { padding: 18px 22px; position: relative; min-width: 0; cursor: pointer; transition: transform .25s var(--ease), border-color .25s; }
+.portal:hover { transform: translateY(-2px); border-color: var(--edge-hi); }
+.portal .k { font: 600 11px var(--ui); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+.portal .native { font: 600 clamp(28px, 4.2vw, 46px)/1.05 var(--cap); letter-spacing: -0.01em; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.portal .en { color: var(--ink-2); font-size: 13px; margin-top: 4px; }
+.portal select { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.portal.right { text-align: right; }
+.portal[data-hot] { border-color: color-mix(in srgb, var(--gold) 60%, transparent); box-shadow: inset 0 1px 0 var(--edge-hi), 0 0 0 1px color-mix(in srgb, var(--gold) 18%, transparent), 0 24px 70px color-mix(in srgb, var(--ember) 24%, transparent); }
+.swap { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: var(--ink); }
+.swap svg { width: 20px; height: 20px; transition: transform .4s var(--ease); }
+.swap:hover svg { transform: rotate(180deg); }
+
+/* Caption theatre */
+.theatre { min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 10px; padding-inline: 8px; }
+.cap-now { font: 600 clamp(26px, 4.4vw, 56px)/1.12 var(--cap); letter-spacing: -0.015em; max-width: 24ch; text-wrap: balance; overflow-wrap: anywhere;
+  text-shadow: var(--cap-shadow, 0 2px 30px rgba(0, 0, 0, .55)); font-size: calc(clamp(26px, 4.4vw, 56px) * var(--cap-scale, 1)); }
+.cap-now .w { display: inline-block; animation: word .5s var(--ease) both; }
+@keyframes word { from { opacity: 0; filter: blur(6px); transform: translateY(8px); } }
+.cap-orig { font: 500 clamp(14px, 1.5vw, 18px)/1.4 var(--cap); color: var(--ink-2); max-width: 60ch; overflow-wrap: anywhere; }
+.cap-who { font: 600 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.cap-prev { font: 500 15px/1.4 var(--cap); color: var(--ink-3); max-width: 60ch; overflow-wrap: anywhere; }
+.hint { color: var(--ink-2); font-size: 15px; max-width: 46ch; }
+.hint b { color: var(--ink); font-weight: 600; }
+
+/* Call view */
+.call { min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; max-width: 1180px; width: 100%; margin-inline: auto; align-content: center; }
+.tile { position: relative; aspect-ratio: 16 / 10; max-width: 100%; overflow: hidden; border-radius: 26px; }
+.tile .face { position: absolute; inset: 0; display: grid; place-items: center; }
+.tile .avatar { width: 30%; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; font: 700 clamp(22px, 3vw, 40px) var(--display);
+  background: radial-gradient(circle at 35% 30%, #ffb38a, #b8345b 60%, #3a1440); box-shadow: 0 20px 60px rgba(0, 0, 0, .5); position: relative; }
+.tile[data-who="you"] .avatar { background: radial-gradient(circle at 35% 30%, #ffe0a3, #c76b2e 60%, #3a1d14); }
+.tile .ring { position: absolute; inset: -14%; border-radius: 50%; border: 2px solid rgba(255, 196, 107, .0); }
+.tile[data-speaking] .ring { animation: ring 1.4s var(--ease) infinite; }
+.tile .avatar { background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--gold) 60%, #fff), var(--ember) 60%, color-mix(in srgb, var(--ember) 30%, #120614)) !important; }
+.tile[data-who="you"] .avatar { background: radial-gradient(circle at 35% 30%, #fff, var(--gold) 60%, color-mix(in srgb, var(--gold) 30%, #140c06)) !important; }
+.tile[data-speaking] .ring:nth-child(2) { animation-delay: .45s; }
+@keyframes ring { 0% { transform: scale(.85); border-color: color-mix(in srgb, var(--gold) 70%, transparent); } 100% { transform: scale(1.35); border-color: transparent; } }
+.tile .name { position: absolute; top: 14px; left: 16px; display: flex; gap: 8px; align-items: center; font-weight: 600; font-size: 13px; }
+.tile .name span { color: var(--ink-3); font-weight: 500; }
+.tile .sub { position: absolute; left: 14px; right: 14px; bottom: 14px; padding: 10px 14px; border-radius: 14px; background: var(--sub-bg, rgba(0, 0, 0, .72));
+  font: 500 clamp(14px, 1.4vw, 18px)/1.35 var(--cap); min-height: 2.8em; }
+.tile .sub small { display: block; color: var(--ink-3); font-size: .78em; margin-top: 2px; }
+.callnote { grid-column: 1 / -1; text-align: center; color: var(--ink-3); font-size: 12.5px; }
+/* Live video in the call tiles: your camera, and their side from the call app's window */
+.tile video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; display: none; background: #000; }
+.tile[data-video] video { display: block; }
+.tile[data-video] .face { display: none; }
+.tile .name, .tile .sub { z-index: 1; }
+.tile[data-video] .name { padding: 4px 10px; border-radius: 10px; background: var(--sub-bg, rgba(0, 0, 0, .6)); }
+.tile[data-video][data-speaking] { box-shadow: inset 0 0 0 3px var(--gold); }
+.tile .cam { position: absolute; top: 10px; right: 12px; z-index: 2; display: flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px;
+  border: 1px solid var(--edge); background: var(--glass-strong); color: var(--ink); font: 600 12px var(--ui, inherit); cursor: pointer; }
+.tile .cam:hover { border-color: var(--edge-hi); }
+.tile .cam[aria-pressed="true"] { background: var(--gold); color: #111; border-color: transparent; }
+
+/* Dock */
+.dock { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 18px; padding: 12px 18px; max-width: 1080px; width: 100%; margin-inline: auto; }
+.dock-l, .dock-r { display: flex; gap: 10px; min-width: 0; align-items: center; }
+.dock-r { justify-content: flex-end; }
+.pick { position: relative; display: flex; align-items: center; gap: 10px; padding: 9px 14px; flex: 0 1 auto; border-radius: 14px; border: 1px solid var(--edge); background: rgba(255, 255, 255, .03); min-width: 0; cursor: pointer; }
+.pick:hover { border-color: var(--edge-hi); }
+.pick svg { width: 16px; height: 16px; color: var(--ink-2); flex: none; }
+.pick div { min-width: 0; } .pick b { display: block; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pick span { display: block; font-size: 11px; color: var(--ink-3); }
+.pick select { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.vol { display: flex; align-items: center; gap: 9px; padding: 8px 12px; border-radius: 14px; border: 1px solid var(--edge); background: rgba(255, 255, 255, .03); min-width: 0; }
+.vol svg { width: 16px; height: 16px; color: var(--ink-2); flex: none; }
+.vol input { width: clamp(70px, 9vw, 130px); }
+.vol output { font: 500 11px var(--mono); color: var(--ink-2); width: 2.6em; text-align: right; font-variant-numeric: tabular-nums; }
+.stat { text-align: right; } .stat b { display: block; font: 500 20px var(--mono); font-variant-numeric: tabular-nums; } .stat span { font-size: 11px; color: var(--ink-3); }
+.spark { width: 84px; height: 30px; }
+
+.orbwrap { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.orb { position: relative; width: 60px; height: 60px; flex: none; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center; color: #1a1418;
+  background: var(--orb, radial-gradient(circle at 35% 28%, #fff7f0, #ffd2b8 45%, #f08a5d 100%)); box-shadow: 0 0 0 1px rgba(255, 255, 255, .25) inset, 0 18px 50px rgba(255, 106, 61, .35);
+  transition: transform .2s var(--ease); }
+.orb:hover { transform: scale(1.04); } .orb:active { transform: scale(.97); }
+.orb svg { width: 24px; height: 24px; position: relative; z-index: 2; }
+.orb::before, .orb::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(255, 106, 61, 0); }
+.orb[data-live] { background: radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--ember) 35%, #fff), var(--ember) 55%, color-mix(in srgb, var(--ember) 55%, #300) 100%); color: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .25) inset, 0 0 60px color-mix(in srgb, var(--ember) 65%, transparent); }
+.orb[data-live]::before { animation: orbring 1.8s var(--ease) infinite; } .orb[data-live]::after { animation: orbring 1.8s .6s var(--ease) infinite; }
+@keyframes orbring { 0% { transform: scale(1); border-color: color-mix(in srgb, var(--ember) 70%, transparent); } 100% { transform: scale(1.7); border-color: transparent; } }
+.orb-label { white-space: nowrap; font: 600 10.5px var(--mono); letter-spacing: .12em; color: var(--ink-2); line-height: 1; }
+
+/* Setup sheet */
+.sheet { position: fixed; inset: 0; z-index: 5; display: grid; place-items: center; padding: 16px; background: rgba(5, 4, 10, .55); }
+.sheet-card { width: min(560px, 100%); padding: 28px; display: grid; gap: 18px; }
+.sheet-card h2 { margin: 0; font: 700 28px/1.1 var(--display); letter-spacing: -0.02em; }
+.sheet-card p { margin: 0; color: var(--ink-2); }
+.steps { display: grid; gap: 10px; }
+.step { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: start; }
+.step i { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 12px var(--mono); border: 1px solid var(--edge-hi); color: var(--ink-2); font-style: normal; }
+.step[data-done] i { background: var(--ok); color: var(--night); border-color: transparent; }
+.step b { display: block; } .step span { color: var(--ink-3); font-size: 12.5px; }
+.bar { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), var(--ember)); transition: width .4s var(--ease); }
+.cta { border: 0; border-radius: 16px; padding: 15px; font: 700 15px var(--display); cursor: pointer; color: #1a1418; background: var(--pill, linear-gradient(180deg, #fff6ee, #ffcfb4)); box-shadow: 0 14px 40px rgba(255, 106, 61, .3); }
+.cta:disabled { opacity: .6; cursor: progress; }
+
+/* Settings drawer */
+.drawer { position: fixed; top: 12px; right: 12px; bottom: 12px; width: min(380px, calc(100% - 24px)); z-index: 6; padding: 22px; overflow: auto; display: grid; align-content: start; gap: 14px; background: var(--glass-strong); }
+.drawer h3 { margin: 0 0 4px; font: 700 20px var(--display); }
+.opt { display: flex; justify-content: space-between; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--edge); }
+.opt p { margin: 3px 0 0; font-size: 12px; color: var(--ink-3); }
+.sw { position: relative; width: 42px; height: 24px; flex: none; }
+.sw input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+.sw i { position: absolute; inset: 0; border-radius: 999px; background: rgba(255, 255, 255, .14); transition: background .2s; }
+.sw i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s var(--ease); }
+.sw input:checked + i { background: var(--ember); } .sw input:checked + i::after { transform: translateX(18px); }
+.sw input:focus-visible + i { outline: 2px solid var(--gold); outline-offset: 2px; }
+.drawer select { background: rgba(255, 255, 255, .06); border: 1px solid var(--edge); border-radius: 12px; padding: 9px 10px; max-width: 170px; }
+.small { font-size: 12px; color: var(--ink-3); }
+.models { display: grid; gap: 8px; padding: 4px 0 14px; border-bottom: 1px solid var(--edge); }
+.devices { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--edge); }
+.stream { display: grid; gap: 4px; padding: 12px 0 0; border-top: 1px solid var(--edge); }
+.stream .opt { border-top: 0; padding: 8px 0; }
+.stream p.small { margin: 0; }
+.devices p { margin: 0; }
+.linkbtn { border: 1px solid var(--edge); background: rgba(255,255,255,.04); color: var(--gold); font-weight: 600; border-radius: 10px; padding: 7px 12px; cursor: pointer; flex: none; }
+.linkbtn:hover { border-color: var(--gold); }
+.opt code { font: 500 11.5px var(--mono); color: var(--ink-2); word-break: break-all; }
+.pick::after { content: ""; width: 7px; height: 7px; flex: none; margin-left: 2px; border-right: 1.6px solid var(--ink-3); border-bottom: 1.6px solid var(--ink-3); transform: translateY(-2px) rotate(45deg); }
+.models p { margin: 0; }
+.mrow { display: grid; grid-template-columns: 82px minmax(0, 1fr); align-items: center; gap: 10px; }
+.mrow span { font-size: 12.5px; color: var(--ink-2); font-weight: 600; }
+.drawer .mrow select { max-width: none; width: 100%; }
+.swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding: 4px 0 6px; }
+.swatch { border: 1px solid var(--edge); border-radius: 14px; padding: 8px 6px 7px; background: rgba(255,255,255,.03); cursor: pointer; display: grid; gap: 6px; justify-items: center; color: var(--ink-2); font-size: 11px; font-weight: 600; }
+.swatch i { width: 100%; height: 26px; border-radius: 9px; display: block; }
+.swatch-group { grid-column: 1 / -1; font: 600 10.5px var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); margin-top: 6px; }
+.swatch[aria-pressed="true"] { border-color: var(--gold); color: var(--ink); box-shadow: 0 0 0 1px var(--gold) inset; }
+.range { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--edge); }
+.range div { display: flex; justify-content: space-between; } .range output { font: 500 12px var(--mono); color: var(--ink-2); }
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--gold) 0%, var(--ember) var(--fill, 50%), var(--edge) var(--fill, 50%)); outline: none; cursor: pointer; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--orb); border: 2px solid var(--ink); box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--orb); border: 2px solid var(--ink); }
+input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--gold); outline-offset: 2px; }
+* { scrollbar-width: thin; scrollbar-color: var(--ember) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; } ::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--gold), var(--ember)); border-radius: 999px; border: 3px solid transparent; background-clip: padding-box; }
+.preview-note { position: fixed; left: 16px; bottom: 6px; margin: 0; z-index: 4; font: 500 11px var(--mono); color: var(--ink-3); letter-spacing: .06em; }
+
+@media (max-width: 1020px) and (min-width: 761px) {
+  .modes button { min-width: 0; padding: 8px 14px; }
+  .dock-r .stat span { display: none; }
+  .pick span { display: none; } .pick { padding: 9px 12px; }
+}
+@media (max-height: 640px) and (min-width: 761px) {
+  .stage { gap: 10px; padding-top: 0; } .portal { padding: 12px 16px; } .portal .native { font-size: 28px; }
+}
+@media (max-width: 760px) {
+  body { overflow: auto; }
+  .shell { height: auto; min-height: 100%; }
+  .top { flex-wrap: wrap; } .modes { position: static; transform: none; order: 3; margin: 0; width: 100%; }
+  .modes button { min-width: 0; padding: 8px 10px; }
+  .bridge { grid-template-columns: 1fr; } .swap { justify-self: center; transform: rotate(90deg); } .portal.right { text-align: left; }
+  .call { grid-template-columns: 1fr; }
+  .dock { grid-template-columns: 1fr; justify-items: center; } .dock-l, .dock-r { flex-wrap: wrap; justify-content: center; } .stat { text-align: center; }
+  .theatre { min-height: 220px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><linearGradient id="markGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc46b"/><stop offset=".5" stop-color="#ff6a3d"/><stop offset="1" stop-color="#ff4f86"/></linearGradient></defs>
+  <symbol id="i-mark" viewBox="0 0 24 24"><path d="M4 8.5a4.5 4.5 0 0 1 4.5-4.5h4A4.5 4.5 0 0 1 17 8.5v1A4.5 4.5 0 0 1 12.5 14H9l-3.2 2.6V13.4A4.5 4.5 0 0 1 4 9.5z" fill="none" stroke="url(#markGrad)" stroke-width="1.8" stroke-linejoin="round"/><path d="M19.5 10.2A4.5 4.5 0 0 1 20 12.3v1.2a4.5 4.5 0 0 1-2 3.7v3l-3-2.4h-2.5" fill="none" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3.5" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2.5" fill="currentColor"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 7h11l-3-3M17 17H6l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M5 7h9M18 7h1M5 17h1M10 17h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M4 9.5h3l4.5-4v13l-4.5-4H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-voice" viewBox="0 0 24 24"><path d="M4 12h1.5M7.5 8v8M11 5v14M14.5 8.5v7M18 10.5v3M20.5 12h0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+</svg>
+
+<div class="shell">
+  <header class="top" data-tauri-drag-region>
+    <div class="winctl" aria-label="Window">
+      <button class="wc-close" id="wcClose" type="button" aria-label="Close to tray"><svg viewBox="0 0 10 10"><path d="M2 2l6 6M8 2L2 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+      <button class="wc-min" id="wcMin" type="button" aria-label="Minimize"><svg viewBox="0 0 10 10"><path d="M2 5h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+      <button class="wc-zoom" id="wcZoom" type="button" aria-label="Zoom"><svg viewBox="0 0 10 10"><path d="M3 2h5v5M7 8H2V3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="mark" data-tauri-drag-region><span class="head" aria-hidden="true"></span><div><b>Live Translate</b><small>for Hermes Agent</small></div></div>
+    <div class="modes glass" role="group" aria-label="Mode">
+      <button type="button" data-mode="listen" aria-pressed="true">Listen</button>
+      <button type="button" data-mode="talk" aria-pressed="false">Conversation</button>
+      <button type="button" data-mode="call" aria-pressed="false">Call</button>
+    </div>
+    <span class="livechip glass" id="chip"><i></i><span id="chipText">READY</span></span>
+    <button class="iconbtn" id="gear" type="button" aria-label="Settings"><svg><use href="#i-gear"/></svg></button>
+  </header>
+
+  <main class="stage">
+    <section class="bridge" aria-label="Languages">
+      <label class="portal glass" id="pFrom">
+        <div class="k" id="kFrom">They speak</div>
+        <div class="native" id="nFrom">Any language</div>
+        <div class="en" id="eFrom">Detected as they talk</div>
+        <select id="from" aria-label="Language they speak"></select>
+      </label>
+      <button class="swap glass" id="swap" type="button" aria-label="Swap languages"><svg><use href="#i-swap"/></svg></button>
+      <label class="portal glass right" id="pTo">
+        <div class="k" id="kTo">You hear</div>
+        <div class="native" id="nTo">English</div>
+        <div class="en" id="eTo">In their own voice</div>
+        <select id="to" aria-label="Language you hear"></select>
+      </label>
+    </section>
+
+    <section class="theatre" id="theatre" aria-live="polite">
+      <div class="cap-who" id="capWho"></div>
+      <div class="cap-now" id="capNow"></div>
+      <div class="cap-orig" id="capOrig"></div>
+      <div class="cap-prev" id="capPrev"></div>
+      <div class="hint" id="hint">Press the orb and talk to anyone, in any language. <b>They hear you in theirs. You hear them in yours</b>, in their own voice, a couple of seconds behind.</div>
+    </section>
+
+    <section class="call" id="call" hidden aria-label="Call">
+      <div class="tile glass" data-who="them" id="tThem"><video id="vThem" autoplay muted playsinline></video>
+        <button type="button" class="cam" id="camThem" aria-pressed="false" title="Show the call app's window here: pick FaceTime, Zoom, Meet, Teams or Discord">Show their video</button><div class="face"><div class="avatar"><span class="ring"></span><span class="ring"></span><span id="aThem">中</span></div></div>
+        <div class="name">Them <span id="lThem">· 中文</span></div><div class="sub" id="sThem">Their words, in your language.<small>Original underneath</small></div></div>
+      <div class="tile glass" data-who="you" id="tYou"><video id="vYou" autoplay muted playsinline></video>
+        <button type="button" class="cam" id="camYou" aria-pressed="false" title="Show your camera">Camera</button><div class="face"><div class="avatar"><span class="ring"></span><span class="ring"></span><span>You</span></div></div>
+        <div class="name">You <span id="lYou">· English</span></div><div class="sub" id="sYou">Your words, in their language.<small>In your voice</small></div></div>
+      <p class="callnote">Camera shows you; <i>Show their video</i> brings in the call app's window (FaceTime, Zoom, Meet, Teams, Discord). Live Translate carries the voices and captions.</p>
+    </section>
+  </main>
+
+  <footer class="dock glass" aria-label="Controls">
+    <div class="dock-l">
+      <label class="pick"><svg><use href="#i-mic"/></svg><div><b id="inName">Default microphone</b><span id="inKind">Listen to</span></div><select id="input" aria-label="Listen to"></select></label>
+      <label class="pick"><svg><use href="#i-speaker"/></svg><div><b id="outName">Speakers</b><span>Play translation on</span></div><select id="output" aria-label="Play translation on"></select></label>
+    </div>
+    <div class="orbwrap">
+      <button class="orb" id="orb" type="button" aria-label="Start translating"><svg id="orbIcon"><use href="#i-mic"/></svg></button>
+      <div class="orb-label" id="orbLabel">START</div>
+    </div>
+    <div class="dock-r">
+      <div class="vol" title="Translation volume"><svg><use href="#i-speaker"/></svg><input type="range" id="vol" min="0" max="150" step="5" value="100" aria-label="Translation volume"><output id="volOut">100</output></div>
+      <span id="voiceName" hidden>Their own voice</span>
+      <div class="stat"><b id="delay">–</b><span>seconds behind</span></div>
+      <svg class="spark" id="spark" viewBox="0 0 84 30" aria-hidden="true"><path id="sparkLine" d="" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+  </footer>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-card glass">
+    <h2>One click and you're talking.</h2>
+    <p>Live Translate runs entirely on this computer. Set it up once; after that it starts in seconds.</p>
+    <div class="steps">
+      <div class="step" id="s1"><i>1</i><div><b>Your language</b><span id="s1t">English, from this computer's settings</span></div></div>
+      <div class="step" id="s2"><i>2</i><div><b>Microphone</b><span>So it can hear who's talking</span></div></div>
+      <div class="step" id="s3"><i>3</i><div><b>Speech models</b><span id="s3t">Picked for this computer, about 9 GB, downloads in the background</span></div></div>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="setupBar"></i></div>
+    <button class="cta" id="setupBtn" type="button">Set up Live Translate</button>
+  </div>
+</div>
+
+<aside class="drawer glass" id="drawer" hidden aria-label="Settings">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h3>Settings</h3><button class="iconbtn" id="closeDrawer" type="button" aria-label="Close settings"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+  <div class="models">
+    <b>Models</b>
+    <p class="small" id="modelsHint">Found on this computer and in your subscriptions. Nothing to set up.</p>
+    <label class="mrow"><span>Hearing</span><select id="mRec" aria-label="Speech recognition model"></select></label>
+    <label class="mrow"><span>Translating</span><select id="mMt" aria-label="Translation model"></select></label>
+    <label class="mrow"><span>Voices</span><select id="voices" aria-label="Voice model"></select></label>
+    <p class="small" id="modelsMissing"></p>
+  </div>
+  <div><b>Theme</b><div class="swatches" id="swatches" role="group" aria-label="Theme"></div></div>
+  <div class="range"><div><label for="capSize"><b>Caption size</b></label><output id="capSizeOut">100%</output></div><input type="range" id="capSize" min="70" max="150" step="5" value="100"></div>
+  <div class="opt"><div><b>Their own voice</b><p>Translations sound like the person talking. Learned on this computer from their first five seconds.</p></div><span class="sw"><input type="checkbox" id="clone" checked aria-label="Their own voice"><i></i></span></div>
+  <div class="devices">
+    <b>Audio devices</b>
+    <label class="mrow"><span>Microphone</span><select id="sInput" aria-label="Microphone"></select></label>
+    <label class="mrow"><span>Listen on</span><select id="sOutput" aria-label="Speakers or headphones"></select></label>
+    <label class="mrow"><span>Your voice to</span><select id="toThem" aria-label="Send your translated voice to"></select></label>
+    <p class="small">"Your voice to" is used in a conversation: pick a virtual microphone to talk into Zoom, Meet, Teams or Discord. Plugged in new headphones? They appear here automatically.</p>
+  </div>
+  <div class="opt"><div><b>Caption bar</b><p>Live subtitles in a small window that stays on top of your meeting or game.</p></div><button class="linkbtn" id="openBar" type="button">Open</button></div>
+  <div class="stream">
+    <b>Your stream</b>
+    <div class="opt"><div><b>Closed captions viewers can turn on</b><p>Sends each translated line into OBS as closed captions. Your stream keeps your real voice; YouTube and Twitch viewers press CC to read the translation. Latin-alphabet languages (Spanish, English, French, Portuguese...).</p></div><span class="sw"><input type="checkbox" id="obsOn" aria-label="Closed captions in OBS"><i></i></span></div>
+    <div class="mrow" id="obsRow" hidden><span>OBS password</span><div style="display:flex;gap:8px;min-width:0"><input type="password" id="obsPass" placeholder="Tools › WebSocket Server Settings" aria-label="OBS WebSocket password" style="flex:1;min-width:0;background:rgba(255,255,255,.06);border:1px solid var(--edge);border-radius:10px;padding:8px 10px;color:var(--ink)"><button class="linkbtn" id="obsTest" type="button">Test</button></div></div>
+    <p class="small" id="obsStatus"></p>
+    <div class="opt"><div><b>Subtitles on screen for everyone</b><p>Or add a Browser Source in OBS with this address to draw subtitles on the video itself: <code id="obsUrl">http://127.0.0.1:7865/</code></p></div><button class="linkbtn" id="copyObs" type="button">Copy</button></div>
+  </div>
+  <p class="small">Live Translate 0.1 · for Hermes Agent · speech, translation and voices run on this device.</p>
+</aside>
+<p class="preview-note" id="previewNote" hidden>PREVIEW · REPLAYING A RECORDED TEST RUN</p>
+
 <script>
-// The control window is served by the Hermes plugin on 127.0.0.1:7865; the tray starts it if needed.
-const URL_ = "http://127.0.0.1:7865/app";
-let tries = 0;
-(function wait() {
-  fetch("http://127.0.0.1:7865/api/state", { mode: "no-cors" })
-    .then(() => { location.replace(URL_); })
-    .catch(() => {
-      if (++tries === 40) document.getElementById("m").textContent =
-        "Still waiting. Make sure Hermes is installed and the live-translate plugin is enabled (hermes translate serve).";
-      setTimeout(wait, 500);
-    });
+const LANGS = __LANGS__;
+// The server token arrives in the URL fragment (#t=...), never in this page's HTML: keep it for this window, then
+// clear it from the address bar.
+const TOKEN = (() => { try { const h = new URLSearchParams(location.hash.slice(1)).get("t");
+  if (h) { sessionStorage.setItem("lt.t", h); history.replaceState(null, "", location.pathname + location.search); return h; }
+  return sessionStorage.getItem("lt.t") || "__TOKEN__"; } catch (e) { return "__TOKEN__"; } })();
+const $ = (id) => document.getElementById(id);
+const NAME = Object.fromEntries(LANGS.map(([c, n]) => [c, n]));
+const NATIVE = { zh: "中文", es: "Español", en: "English", ar: "العربية", hi: "हिन्दी", ja: "日本語", ko: "한국어", fr: "Français", de: "Deutsch", ru: "Русский",
+  pt: "Português", it: "Italiano", tr: "Türkçe", vi: "Tiếng Việt", th: "ไทย", id: "Bahasa Indonesia", ms: "Bahasa Melayu", nl: "Nederlands", pl: "Polski",
+  sv: "Svenska", no: "Norsk", da: "Dansk", fi: "Suomi", el: "Ελληνικά", he: "עברית", fa: "فارسی", ur: "اردو", bn: "বাংলা", ta: "தமிழ்", te: "తెలుగు",
+  sw: "Kiswahili", uk: "Українська", cs: "Čeština", ro: "Română", hu: "Magyar", tl: "Tagalog", yue: "粵語", ta: "தமிழ்", mr: "मराठी", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ" };
+const OWN = Object.fromEntries(LANGS.map(([c, , o]) => [c, !!o]));
+const store = { get(k, d) { try { const v = localStorage.getItem("lt." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+                set(k, v) { try { localStorage.setItem("lt." + k, JSON.stringify(v)); } catch (e) {} } };
+let mode = "listen", demo = false, lastId = -1, liveSince = null, delays = [];
+const sky = { live: 0, level: 0, dir: 1 };   // what the light shows
+
+/* ---------- themes: every colour on the page and in the light comes from the active theme ---------- */
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+const THEMES = {
+  "hermes-default": { name: "Classic", group: "hermes", sky: ["#CD7F32", "#FFBF00", "#FFBF00", "#FFD700"], bg: "#0e0e19", ink: "#FFF8DC", accent: "#FFD700", live: "#FFBF00", orb: ["#FFF8DC", "#FFD700", "#CD7F32"] },
+  "hermes-ares": { name: "Ares", group: "hermes", sky: ["#A93333", "#DD4A3A", "#DD4A3A", "#C7A96B"], bg: "#170909", ink: "#F1E6CF", accent: "#C7A96B", live: "#DD4A3A", orb: ["#F1E6CF", "#C7A96B", "#A93333"] },
+  "hermes-mono": { name: "Mono", group: "hermes", sky: ["#5E5E5E", "#aaaaaa", "#aaaaaa", "#e6edf3"], bg: "#111111", ink: "#c9d1d9", accent: "#e6edf3", live: "#aaaaaa", orb: ["#c9d1d9", "#e6edf3", "#5E5E5E"] },
+  "hermes-slate": { name: "Slate", group: "hermes", sky: ["#4169e1", "#8EA8FF", "#7eb8f6", "#7eb8f6"], bg: "#0b0f19", ink: "#c9d1d9", accent: "#7eb8f6", live: "#7eb8f6", orb: ["#c9d1d9", "#7eb8f6", "#4169e1"] },
+  "hermes-daylight": { name: "Daylight", group: "hermes", sky: ["#2563EB", "#2563EB", "#1D4ED8", "#93b4f5"], bg: "#E5EDF8", ink: "#111827", accent: "#2563EB", live: "#2563EB", orb: ["#ffffff", "#f3e6cf", "#2563EB"], light: true },
+  "hermes-warm-lightmode": { name: "Warm Light", group: "hermes", sky: ["#8B4513", "#8B6914", "#8B4513", "#f4c37a"], bg: "#F5F0E8", ink: "#2C1810", accent: "#8B4513", live: "#8B4513", orb: ["#ffffff", "#f3e6cf", "#8B6914"], light: true },
+  "hermes-poseidon": { name: "Poseidon", group: "hermes", sky: ["#2A6FB9", "#5DB8F5", "#5DB8F5", "#A9DFFF"], bg: "#081323", ink: "#EAF7FF", accent: "#A9DFFF", live: "#5DB8F5", orb: ["#EAF7FF", "#A9DFFF", "#2A6FB9"] },
+  "hermes-sisyphus": { name: "Sisyphus", group: "hermes", sky: ["#B7B7B7", "#E7E7E7", "#E7E7E7", "#F5F5F5"], bg: "#111111", ink: "#D3D3D3", accent: "#F5F5F5", live: "#E7E7E7", orb: ["#D3D3D3", "#F5F5F5", "#B7B7B7"] },
+  "hermes-charizard": { name: "Charizard", group: "hermes", sky: ["#C75B1D", "#F29C38", "#F29C38", "#FFD39A"], bg: "#170c07", ink: "#FFF0D4", accent: "#FFD39A", live: "#F29C38", orb: ["#FFF0D4", "#FFD39A", "#C75B1D"] },
+  aurora:   { name: "Aurora",          sky: ["#8b5cf6", "#ff4f86", "#ff6a3d", "#ffc46b"], bg: "#05040a", ink: "#f6f1ec", accent: "#ffc46b", live: "#ff6a3d", orb: ["#fff7f0", "#ffd2b8", "#f08a5d"] },
+  ember:    { name: "Ember Gold",      sky: ["#b4532a", "#ff7a2e", "#ffb347", "#ffe29a"], bg: "#070403", ink: "#fbf3e8", accent: "#ffcf73", live: "#ff7a2e", orb: ["#fff6e3", "#ffd89a", "#e9963c"] },
+  rose:     { name: "Rose Quartz",     sky: ["#a78bfa", "#f472b6", "#fb7185", "#fecdd3"], bg: "#08040a", ink: "#fcf2f6", accent: "#f9a8d4", live: "#fb7185", orb: ["#fff3f7", "#fbc7da", "#e7799c"] },
+  emerald:  { name: "Emerald",         sky: ["#1f7a4d", "#34c27a", "#a3e36a", "#f3d36b"], bg: "#030705", ink: "#f0f7f1", accent: "#a3e36a", live: "#f3a64b", orb: ["#f4fff2", "#c8f0b8", "#55b97a"] },
+  indigo:   { name: "Midnight Indigo", sky: ["#3b2fa8", "#6d5dfc", "#b05cf6", "#f06cc4"], bg: "#04030c", ink: "#f1efff", accent: "#b9a8ff", live: "#f06cc4", orb: ["#f6f3ff", "#cfc6ff", "#8b6ff0"] },
+  graphite: { name: "Graphite",        sky: ["#5d5f66", "#8a8d95", "#c9ccd2", "#ff6a3d"], bg: "#08090b", ink: "#eef0f3", accent: "#e8eaee", live: "#ff6a3d", orb: ["#ffffff", "#dfe2e6", "#9da2aa"] },
+  daylight: { name: "Daylight",        sky: ["#c4b5fd", "#f9a8d4", "#fdba74", "#fde68a"], bg: "#f6f1ec", ink: "#1d1720", accent: "#c2410c", live: "#e5532d", orb: ["#ffffff", "#ffe1cf", "#f29a6b"], light: true },
+};
+const THEME = { current: null, hermesSkin: "default" };
+function applyTheme(key) {
+  const real = key === "match-hermes" ? "hermes-" + THEME.hermesSkin : key;
+  const t = THEMES[real] || THEMES.aurora; const r = document.documentElement.style;
+  THEME.current = { ...t, sky: t.sky.map(hex), bg3: hex(t.bg) };
+  const L = !!t.light;
+  r.setProperty("--night", t.bg); r.setProperty("--ink", t.ink);
+  r.setProperty("--ink-2", L ? "rgba(29,23,32,.68)" : hexa(t.ink, .66)); r.setProperty("--ink-3", L ? "rgba(29,23,32,.46)" : hexa(t.ink, .42));
+  r.setProperty("--gold", t.accent); r.setProperty("--ember", t.live);
+  r.setProperty("--glass", L ? "rgba(255,255,255,.5)" : "rgba(22,18,30,.42)"); r.setProperty("--glass-strong", L ? "rgba(255,255,255,.78)" : "rgba(18,14,26,.62)");
+  r.setProperty("--edge", L ? "rgba(40,20,40,.12)" : "rgba(255,236,220,.16)"); r.setProperty("--edge-hi", L ? "rgba(255,255,255,.9)" : "rgba(255,244,232,.34)");
+  r.setProperty("--orb", `radial-gradient(circle at 35% 28%, ${t.orb[0]}, ${t.orb[1]} 45%, ${t.orb[2]} 100%)`);
+  r.setProperty("--pill", `linear-gradient(180deg, ${t.orb[0]}, ${t.orb[1]})`);
+  r.setProperty("--sub-bg", L ? "rgba(255,255,255,.82)" : "rgba(0,0,0,.72)");
+  r.setProperty("--cap-shadow", L ? "0 1px 18px rgba(255,255,255,.7)" : "0 2px 30px rgba(0,0,0,.55)");
+  document.documentElement.style.colorScheme = L ? "light" : "dark";
+  document.querySelectorAll("#markGrad stop").forEach((st, i) => st.setAttribute("stop-color", t.sky[[3, 2, 1][i]]));
+  document.querySelectorAll(".swatch").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.theme === key)));
+  store.set("theme", key);
+}
+function hexa(h, a) { const [r, g, b] = hex(h).map((v) => Math.round(v * 255)); return `rgba(${r},${g},${b},${a})`; }
+applyTheme(store.get("theme", "aurora"));
+
+/* ---------- WebGL: voice as light ---------- */
+(function () {
+  const cv = $("sky"), gl = cv.getContext("webgl", { premultipliedAlpha: false, antialias: false });
+  if (!gl) return;
+  const vs = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+  const fs = `precision highp float;uniform vec2 r;uniform float t,live,level,dir,lightmode;uniform vec3 c0,c1,c2,c3,bg;
+  float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+  float fbm(vec2 p){float v=0.,a=.5;for(int k=0;k<5;k++){v+=a*n(p);p*=2.03;a*=.5;}return v;}
+  vec3 pal(float x){x=clamp(x,0.,1.);return x<.33?mix(c0,c1,x/.33):x<.66?mix(c1,c2,(x-.33)/.33):mix(c2,c3,(x-.66)/.34);}
+  void main(){vec2 uv=gl_FragCoord.xy/r;vec2 p=(gl_FragCoord.xy-.5*r)/r.y;float tt=t*.06;
+    vec3 base=bg*(1.+.35*(1.-uv.y)*(1.-lightmode))-vec3(.04)*lightmode*uv.y;vec3 col=vec3(0.);
+    float energy=.35+.65*live+.6*level;
+    for(int k=0;k<3;k++){float fk=float(k);
+      float y=.08*sin(p.x*1.6+tt*2.+fk*1.7)+.12*(fbm(vec2(p.x*1.2-tt*dir*(1.+fk*.3),fk*3.1+tt))-.5)*2.-.05+fk*.06-.06;
+      float w=.006+.05*energy*(.6+.4*sin(p.x*3.+t*.7+fk));
+      float d=abs(p.y-y);
+      float core=exp(-d*d/(w*w*.18));float glow=exp(-d/(w*3.5+.03));
+      float flow=.5+.5*sin(p.x*7.-t*(1.5+3.*live)*dir+fk*2.);
+      float hue=fract(.15+.55*(p.x*.35+.5)+fk*.18+.08*sin(t*.2));
+      col+=pal(hue)*(core*(.55+.6*flow*live)+glow*(.13+.35*energy))*(.55+.45*energy)*(1.-.25*fk);}
+    float caustic=fbm(p*3.+vec2(tt*2.,-tt))*fbm(p*5.-tt);col+=mix(c0,c1,.5)*.35*caustic*.18*(1.-uv.y);
+    vec3 dark=(base+col)*(1.-.55*pow(length(uv-.5)*1.25,2.));
+    float I=clamp(length(col)*.55,0.,.92);vec3 C=col/max(max(col.r,max(col.g,col.b)),1e-3);
+    vec3 light=mix(base,mix(C*.92,base,.15),I*.75);
+    gl_FragColor=vec4(pow(mix(dark,light,lightmode),vec3(.9)),1.);}`;
+  const sh = (ty, src) => { const o = gl.createShader(ty); gl.shaderSource(o, src); gl.compileShader(o); return gl.getShaderParameter(o, gl.COMPILE_STATUS) ? o : null; };
+  const v = sh(gl.VERTEX_SHADER, vs), f = sh(gl.FRAGMENT_SHADER, fs); if (!v || !f) return;
+  const pr = gl.createProgram(); gl.attachShader(pr, v); gl.attachShader(pr, f); gl.linkProgram(pr); gl.useProgram(pr);
+  const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const U = (n) => gl.getUniformLocation(pr, n), ur = U("r"), ut = U("t"), ul = U("live"), uv = U("level"), ud = U("dir");
+  const uc = ["c0", "c1", "c2", "c3"].map(U), ubg = U("bg"), ulm = U("lightmode");
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let L = 0, V = 0, D = 1; const t0 = performance.now();
+  function frame(now) {
+    const dpr = Math.min(devicePixelRatio || 1, 1.5), w = Math.floor(innerWidth * dpr), h = Math.floor(innerHeight * dpr);
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; gl.viewport(0, 0, w, h); }
+    L += (sky.live - L) * .05; V += (sky.level - V) * .12; D += (sky.dir - D) * .03;
+    gl.uniform2f(ur, w, h); gl.uniform1f(ut, still ? 20 : (now - t0) / 1000); gl.uniform1f(ul, L); gl.uniform1f(uv, V); gl.uniform1f(ud, D);
+    const th = THEME.current; th.sky.forEach((c, i) => gl.uniform3fv(uc[i], c)); gl.uniform3fv(ubg, th.bg3); gl.uniform1f(ulm, th.light ? 1 : 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3); if (!still) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 })();
-</script></body></html>
+
+/* ---------- languages ---------- */
+function fill() {
+  const f = $("from"), t = $("to");
+  f.add(new Option("Detect automatically", "auto"));
+  for (const [c, n] of LANGS) { f.add(new Option((NATIVE[c] && NATIVE[c] !== n ? NATIVE[c] + " · " : "") + n, c)); t.add(new Option((NATIVE[c] && NATIVE[c] !== n ? NATIVE[c] + " · " : "") + n, c)); }
+  const sys = (navigator.language || "en").slice(0, 2).toLowerCase();
+  f.value = store.get("from", "auto"); t.value = store.get("to", NAME[sys] ? sys : "en");
+  for (const [id, label] of [["input", "Default microphone"], ["output", "Speakers"], ["toThem", "Speakers in the room"]]) $(id).add(new Option(label, ""));
+  $("s1t").textContent = (NATIVE[t.value] || NAME[t.value] || "English") + ", from this computer's settings";
+  paintLangs();
+}
+function paintLangs() {
+  const f = $("from").value, t = $("to").value;
+  $("nFrom").textContent = f === "auto" ? "Any language" : NATIVE[f] || NAME[f];
+  $("eFrom").textContent = f === "auto" ? "Detected as they talk" : NAME[f];
+  $("nTo").textContent = NATIVE[t] || NAME[t]; $("eTo").textContent = (NATIVE[t] && NATIVE[t] !== NAME[t] ? NAME[t] + " · " : "") + (OWN[t] ? "in their own voice" : "in a natural voice");
+  $("voiceName").textContent = $("clone").checked ? (OWN[t] ? "Their own voice" : "Natural voice") : "Natural voice";
+  const vSel = $("voices"); if (vSel && vSel.value && !["best", "commercial", ""].includes(vSel.value)) $("eTo").textContent = (NAME[t] || t) + " · " + (vSel.selectedOptions[0] || {}).text;
+  $("lThem").textContent = "· " + (f === "auto" ? "detecting" : NATIVE[f] || NAME[f]); $("lYou").textContent = "· " + (NATIVE[t] || NAME[t]);
+  $("aThem").textContent = f === "auto" ? "?" : (NATIVE[f] || NAME[f]).slice(0, 1);
+  if (mode !== "listen") { $("kFrom").textContent = "They speak"; $("kTo").textContent = "You speak"; } else { $("kFrom").textContent = "They speak"; $("kTo").textContent = "You hear"; }
+}
+
+/* ---------- live state ---------- */
+async function api(path, body) {
+  const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json", "X-LT-Token": TOKEN }, body: JSON.stringify(body) }
+                                    : { headers: { "X-LT-Token": TOKEN } });
+  if (!r.ok) throw new Error((await r.text()) || r.statusText); return r.json();
+}
+function clock(ms) { const s = Math.floor(ms / 1000); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+function render(st) {
+  const s = st.state || {}, session = s.session || "idle", live = s.live || {};
+  const on = session === "live" || session === "starting";
+  if (session === "live" && !liveSince) liveSince = Date.now(); if (!on) liveSince = null;
+  $("sheet").hidden = !(session === "not_set_up" || session === "setting_up");
+  if (session === "setting_up") { $("setupBtn").disabled = true; $("setupBtn").textContent = "Setting up…"; $("setupBar").style.width = "40%"; }
+  const chip = $("chip"); if (on) chip.dataset.on = ""; else delete chip.dataset.on;
+  $("chipText").textContent = session === "live" ? "LIVE " + clock(Date.now() - liveSince) : session === "starting" ? "WARMING UP" : session === "error" ? "CHECK SETTINGS" : session === "stopping" ? "FINISHING" : "READY";
+  const orb = $("orb"); if (on) orb.dataset.live = ""; else delete orb.dataset.live;
+  $("orbIcon").innerHTML = on ? '<use href="#i-stop"/>' : '<use href="#i-mic"/>';
+  $("orbLabel").textContent = on ? (session === "starting" ? "LOADING" : "STOP") : "START";
+  orb.setAttribute("aria-label", on ? "Stop translating" : "Start translating");
+  if (session === "error" && s.message) { $("hint").hidden = false; $("hint").textContent = s.message.replace("Something went wrong. ", "") + " Press the orb to try again."; }
+  const hearing = live.activity === "hearing", speaking = live.activity === "speaking";
+  sky.live = session === "live" ? 1 : session === "starting" ? .4 : 0;
+  sky.level = hearing ? .9 : speaking ? .6 : live.activity === "translating" ? .45 : 0;
+  sky.dir = live.activity === "speaking" ? 1 : 1;
+  if (hearing) $("pFrom").dataset.hot = ""; else delete $("pFrom").dataset.hot;
+  if (speaking) $("pTo").dataset.hot = ""; else delete $("pTo").dataset.hot;
+  if (live.language && live.language !== "detecting" && $("from").value === "auto") {
+    const nat = NATIVE[live.language] || NAME[live.language] || live.language;
+    $("nFrom").textContent = nat; $("eFrom").textContent = "Detected · " + (NAME[live.language] || live.language);
+    $("lThem").textContent = "· " + nat; $("aThem").textContent = nat.slice(0, 1);
+  }
+  if (live.voice) $("voiceName").textContent = live.voice === "cloned" ? "Their own voice" : "Natural voice";
+  $("tThem").toggleAttribute("data-speaking", hearing); $("tYou").toggleAttribute("data-speaking", speaking && mode !== "listen");
+  const d = st.delay_median_s; $("delay").textContent = d == null ? "–" : d.toFixed(1);
+  if (d != null && delays[delays.length - 1] !== d) { delays.push(d); delays = delays.slice(-24); drawSpark(); }
+  for (const c of st.captions || []) if (c.id > lastId || lastId - c.id > 50) showCaption(c);
+}
+function drawSpark() {
+  if (delays.length < 2) return; const max = Math.max(4, ...delays);
+  $("sparkLine").setAttribute("d", delays.map((v, i) => (i ? "L" : "M") + (i * 84 / (delays.length - 1)).toFixed(1) + " " + (28 - v / max * 26).toFixed(1)).join(" "));
+}
+function showCaption(c) {
+  const prev = $("capNow").textContent; lastId = c.id; $("hint").hidden = true;
+  $("capPrev").textContent = prev;
+  $("capWho").textContent = (c.lane === "b" ? "You" : mode === "listen" ? (NATIVE[c.src] || NAME[c.src] || c.src) : "Them") + "  →  " + (NATIVE[c.tgt] || NAME[c.tgt] || c.tgt);
+  const now = $("capNow"); now.textContent = "";
+  c.translation.split(/(\s+)/).forEach((w, i) => {
+    if (!w.trim()) { now.append(document.createTextNode(" ")); return; }          // keep real spaces between words
+    const s = document.createElement("span"); s.className = "w"; s.style.animationDelay = (i * 0.035) + "s"; s.textContent = w; now.append(s); });
+  $("capOrig").textContent = c.text;
+  if (c.lane === "b") { $("sYou").innerHTML = ""; $("sYou").append(c.translation, Object.assign(document.createElement("small"), { textContent: c.text })); }
+  else { $("sThem").innerHTML = ""; $("sThem").append(c.translation, Object.assign(document.createElement("small"), { textContent: c.text })); }
+}
+async function poll() { try { render(await api("/api/state")); } catch (e) { if (!demo) startDemo(); } }
+async function toggle() {
+  if (demo) return demoToggle();
+  const stop = $("orb").hasAttribute("data-live"); $("orb").disabled = true;
+  try {
+    if (stop) await api("/api/stop", {});
+    else await api("/api/start", { target_language: $("to").value, source_language: $("from").value === "auto" ? null : $("from").value,
+      input_device: $("input").value || null, output_device: $("output").value || null, voice_clone: $("clone").checked, voices: $("voices").value,
+      two_way: mode !== "listen", to_them: $("toThem").value || null, volume: +$("vol").value / 100,
+      recognizer: $("mRec").value || null, translator: $("mMt").value });
+  } catch (e) { $("hint").hidden = false; $("hint").textContent = "Could not start: " + e.message.slice(0, 120); }
+  $("orb").disabled = false; poll();
+}
+function setMode(m) {
+  mode = m; document.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
+  $("theatre").hidden = m === "call"; $("call").hidden = m !== "call";
+  $("inKind").textContent = m === "listen" ? "Listen to" : "Their audio from";
+  if (m !== "listen" && $("from").value === "auto") { $("hint").hidden = false; $("hint").innerHTML = "For a conversation, tap <b>They speak</b> and choose their language, so they can hear you in it."; }
+  paintLangs();
+}
+
+/* ---------- preview mode: replays a recorded Chinese → Spanish run ---------- */
+const SAMPLE = [["zh", "大家好，欢迎参加今天的会议。", "Hola a todos, bienvenidos a la reunión de hoy."],
+  ["zh", "我们的新产品下个月就要发布了。", "Nuestro nuevo producto se lanzará el próximo mes."],
+  ["zh", "这个产品可以把任何语言实时翻译成你的母语，", "Este producto puede traducir cualquier idioma en tiempo real a tu lengua materna,"],
+  ["zh", "而且保留说话人自己的声音。", "y además mantiene la voz del propio hablante."],
+  ["zh", "第一批用户的反馈非常好。", "Las primeras opiniones de los usuarios han sido muy positivas."]];
+let D = { state: { session: "idle" }, captions: [], delay_median_s: null }, demoTimer = null;
+function startDemo() { demo = true; fillModels(DEMO_MODELS); $("previewNote").hidden = false; $("to").value = "es"; paintLangs(); setInterval(() => render(D), 150); }
+function demoToggle() {
+  clearInterval(demoTimer);
+  if ($("orb").hasAttribute("data-live")) { D = { state: { session: "idle" }, captions: [], delay_median_s: null }; return; }
+  D = { state: { session: "starting" }, captions: [], delay_median_s: null };
+  let tick = 0, i = 0;
+  demoTimer = setInterval(() => {
+    tick++;
+    if (tick === 2) D.state = { session: "live", live: { activity: "waiting", language: "detecting", voice: "stock", pace: "on_time" } };
+    if (tick > 2) { const ph = tick % 3, L = D.state.live; L.activity = ["hearing", "translating", "speaking"][ph]; L.language = "zh"; if (tick > 4) L.voice = "cloned";
+      if (ph === 2) { const [src, o, t] = SAMPLE[i % SAMPLE.length]; D.captions = [{ id: i, lane: mode !== "listen" && i % 2 ? "b" : "a", src, tgt: "es", text: o, translation: t }]; i++; D.delay_median_s = 2.4 + (i % 4) * 0.25; } }
+  }, 1400);
+}
+
+/* ---------- live video in the call tiles ---------- */
+async function toggleVideo(tile, video, btn, get) {
+  if (video.srcObject) {                                   // stop: back to the orb
+    video.srcObject.getTracks().forEach((t) => t.stop()); video.srcObject = null;
+    tile.removeAttribute("data-video"); btn.setAttribute("aria-pressed", "false"); return;
+  }
+  try {
+    const stream = await get();
+    video.srcObject = stream; tile.setAttribute("data-video", ""); btn.setAttribute("aria-pressed", "true");
+    stream.getVideoTracks()[0].addEventListener("ended", () => { video.srcObject = null; tile.removeAttribute("data-video"); btn.setAttribute("aria-pressed", "false"); });
+  } catch (e) { btn.title = "Not available: " + (e && e.message ? e.message : "permission denied"); }
+}
+if (navigator.mediaDevices) {
+  $("camYou").onclick = () => toggleVideo($("tYou"), $("vYou"), $("camYou"),
+    () => navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false }));
+  $("camThem").onclick = () => toggleVideo($("tThem"), $("vThem"), $("camThem"),
+    () => navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false }));
+} else { $("camYou").hidden = true; $("camThem").hidden = true; }
+
+/* ---------- inside the desktop app: our own theme-coloured window controls ---------- */
+(function () {
+  const T = window.__TAURI__; if (!T || !T.window) return;
+  document.documentElement.classList.add("in-app");
+  const w = T.window.getCurrentWindow();
+  $("wcClose").onclick = () => w.hide();                 // closing keeps Live Translate in the tray
+  $("wcMin").onclick = () => w.minimize();
+  $("wcZoom").onclick = () => w.toggleMaximize();
+  document.querySelector(".top").addEventListener("dblclick", (e) => { if (e.target.closest("button, select, label")) return; w.toggleMaximize(); });
+})();
+
+/* ---------- models: built-in, running locally, subscriptions ---------- */
+function fillModels(m) {
+  const sel = { mRec: m.recognizer, mMt: m.translator, voices: m.voices };
+  for (const [id, list] of Object.entries(sel)) {
+    const el = $(id), keep = store.get("model." + id, null); el.textContent = "";
+    const groups = {};
+    for (const o of list || []) (groups[o.group] = groups[o.group] || []).push(o);
+    for (const [g, items] of Object.entries(groups)) {
+      const og = document.createElement("optgroup"); og.label = g;
+      for (const o of items) og.append(new Option(o.label, o.id));
+      el.append(og);
+    }
+    if (keep !== null && [...el.options].some((o) => o.value === keep)) el.value = keep;
+    el.onchange = () => { store.set("model." + id, el.value); if (id === "voices") paintLangs(); };
+  }
+  const miss = m.missing || [];
+  $("modelsMissing").textContent = miss.length ? "Use a subscription too: add its key in Hermes (" + miss.join(", ") + ")." : "";
+}
+const DEMO_MODELS = { recognizer: [{ id: "auto", label: "Built-in · Qwen3-ASR + Whisper", group: "On this computer" }, { id: "*=openai:https://api.groq.com/openai/v1#whisper-large-v3-turbo", label: "Groq · whisper-large-v3-turbo", group: "Your subscriptions" }],
+  translator: [{ id: "", label: "Built-in · Qwen3.5-4B, 201 languages", group: "On this computer" }, { id: "openai:http://127.0.0.1:11434/v1#qwen3:8b", label: "Ollama · qwen3:8b", group: "Running on this computer" }, { id: "openai:https://api.openai.com/v1#gpt-5-mini", label: "OpenAI · gpt-5-mini", group: "Your subscriptions" }],
+  voices: [{ id: "commercial", label: "Built-in · their own voice (23 languages) · free for any use", group: "On this computer" }, { id: "best", label: "Built-in · + natural voices in 600+ languages (non-commercial)", group: "On this computer" }, { id: "*=elevenlabs:eleven_flash_v2_5", label: "ElevenLabs voices", group: "Your subscriptions" }], missing: ["Gemini", "Anthropic"] };
+
+/* ---------- audio devices: the dock pickers and Settings mirror each other ---------- */
+let devStamp = 0;
+function loadDevices() {
+  if (demo || Date.now() - devStamp < 3000) return; devStamp = Date.now();
+  api("/api/devices").then((d) => {
+    const fill = (id, first, want) => { const el = $(id), keep = el.value; el.textContent = ""; el.add(new Option(first, ""));
+      for (const dev of d.devices || []) if (want(dev)) el.add(new Option(dev.name, dev.name));
+      if ([...el.options].some((o) => o.value === keep)) el.value = keep; };
+    fill("input", "Default microphone", (x) => x.inputs > 0); fill("sInput", "Default microphone", (x) => x.inputs > 0);
+    fill("output", "Speakers", (x) => x.outputs > 0); fill("sOutput", "Default speakers or headphones", (x) => x.outputs > 0);
+    fill("toThem", "Speakers in the room", (x) => x.outputs > 0);
+  }).catch(() => {});
+}
+function mirror(a, b, label) {
+  const sync = (from, to) => () => { to.value = from.value; $(label).textContent = from.selectedOptions[0] ? from.selectedOptions[0].text : ""; };
+  $(a).addEventListener("change", sync($(a), $(b))); $(b).addEventListener("change", sync($(b), $(a)));
+}
+
+/* ---------- wiring ---------- */
+function swatch(key, t, label) {
+  const b = document.createElement("button"); b.type = "button"; b.className = "swatch"; b.dataset.theme = key;
+  b.innerHTML = "<i></i>"; b.querySelector("i").style.background = `linear-gradient(120deg, ${t.bg} 0 22%, ${t.sky[0]}, ${t.sky[1]}, ${t.sky[2]}, ${t.sky[3]})`;
+  b.append(label || t.name); b.onclick = () => applyTheme(key); return b;
+}
+function buildSwatches() {
+  const box = $("swatches"); box.textContent = "";
+  const h1 = document.createElement("div"); h1.className = "swatch-group"; h1.textContent = "Hermes skins"; box.append(h1);
+  const cur = THEMES["hermes-" + THEME.hermesSkin] || THEMES["hermes-default"];
+  box.append(swatch("match-hermes", cur, "Match my Hermes"));
+  for (const [key, t] of Object.entries(THEMES)) if (t.group === "hermes") box.append(swatch(key, t));
+  const h2 = document.createElement("div"); h2.className = "swatch-group"; h2.textContent = "Live Translate"; box.append(h2);
+  for (const [key, t] of Object.entries(THEMES)) if (t.group !== "hermes") box.append(swatch(key, t));
+  document.querySelectorAll(".swatch").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.theme === store.get("theme", "aurora"))));
+}
+buildSwatches();
+applyTheme(store.get("theme", "aurora"));
+function slider(id, out, fmt, apply) {
+  const el = $(id); el.value = store.get(id, el.value);
+  const upd = () => { const pct = (el.value - el.min) / (el.max - el.min) * 100; el.style.setProperty("--fill", pct + "%"); $(out).textContent = fmt(+el.value); apply(+el.value); store.set(id, el.value); };
+  el.oninput = upd; upd();
+}
+slider("capSize", "capSizeOut", (v) => v + "%", (v) => document.documentElement.style.setProperty("--cap-scale", v / 100));
+
+fill();
+$("from").onchange = () => { store.set("from", $("from").value); paintLangs(); };
+$("to").onchange = () => { store.set("to", $("to").value); paintLangs(); };
+$("swap").onclick = () => { if ($("from").value === "auto") return; [$("from").value, $("to").value] = [$("to").value, $("from").value]; store.set("from", $("from").value); store.set("to", $("to").value); paintLangs(); };
+document.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => setMode(b.dataset.mode));
+$("orb").onclick = toggle;
+$("gear").onclick = () => { $("drawer").hidden = false; }; $("closeDrawer").onclick = () => { $("drawer").hidden = true; };
+$("clone").onchange = paintLangs;
+slider("vol", "volOut", (v) => String(v), (v) => { if (!demo && !TOKEN.startsWith("__")) { clearTimeout(window._vt); window._vt = setTimeout(() => api("/api/volume", { value: v / 100 }).catch(() => {}), 120); } });
+mirror("input", "sInput", "inName"); mirror("output", "sOutput", "outName");
+for (const [id, def] of [["sInput", "Default microphone"], ["sOutput", "Default speakers or headphones"]]) $(id).add(new Option(def, ""));
+$("obsUrl").textContent = location.origin.startsWith("http") ? location.origin + "/" : "http://127.0.0.1:7865/";
+$("copyObs").onclick = () => { navigator.clipboard.writeText($("obsUrl").textContent).then(() => { $("copyObs").textContent = "Copied"; setTimeout(() => $("copyObs").textContent = "Copy", 1500); }).catch(() => { const r = document.createRange(); r.selectNodeContents($("obsUrl")); getSelection().removeAllRanges(); getSelection().addRange(r); }); };
+function obsSave(extra) {
+  if (demo) { $("obsStatus").textContent = extra && extra.test ? "Preview: connects to OBS in the desktop app." : ""; return; }
+  api("/api/obs", { enabled: $("obsOn").checked, ...(extra || {}) }).then((r) => { $("obsStatus").textContent = r.test || (r.enabled ? (r.has_password ? "On: captions go to OBS while you translate." : "Add the OBS WebSocket password, then Test.") : ""); }).catch(() => {});
+}
+$("obsOn").onchange = () => { $("obsRow").hidden = !$("obsOn").checked; obsSave(); };
+$("obsTest").onclick = () => { $("obsStatus").textContent = "Connecting to OBS…"; obsSave({ password: $("obsPass").value, test: true }); $("obsPass").value = ""; };
+$("openBar").onclick = () => {
+  const url = (location.origin.startsWith("http") ? location.origin : "http://127.0.0.1:7865") + "/?bar=1#t=" + encodeURIComponent(TOKEN);
+  const T = window.__TAURI__;
+  if (T && T.webviewWindow) {                     // desktop app: a small always-on-top window
+    T.webviewWindow.WebviewWindow.getByLabel("captions").catch(() => null).then((w) => {
+      if (w) { w.show(); w.setFocus(); return; }
+      new T.webviewWindow.WebviewWindow("captions", { url, title: "Live Translate captions", width: 920, height: 190,
+        alwaysOnTop: true, decorations: false, transparent: true, resizable: true, skipTaskbar: false });
+    });
+  } else window.open(url, "lt-captions", "width=920,height=190");
+};
+$("setupBtn").onclick = () => { if (demo) return; $("setupBtn").disabled = true; api("/api/setup", {}).then(poll).catch(() => { $("setupBtn").disabled = false; $("setupBtn").textContent = "Try again"; }); };
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("drawer").hidden = true; if (e.code === "Space" && e.target === document.body) { e.preventDefault(); toggle(); } });
+if (TOKEN.startsWith("__")) startDemo(); else {
+  api("/api/models").then(fillModels).catch(() => {});
+  api("/api/hermes-skin").then((h) => { if (h && h.skin) { THEME.hermesSkin = h.skin; buildSwatches(); if (store.get("theme", "aurora") === "match-hermes") applyTheme("match-hermes"); } }).catch(() => {});
+  loadDevices();
+  for (const id of ["input", "output", "sInput", "sOutput", "toThem"]) $(id).addEventListener("focus", loadDevices);
+  poll(); setInterval(poll, 400);
+}
+</script>

@@ -100,18 +100,55 @@ def languages():
     return {"understands": len(rows), "translates_between": "201 languages and dialects",
             "speaks_in_own_voice": sum(r["voice"] == "own voice" for r in rows), "languages": rows}
 
+VENDOR_HOSTS = {"OPENAI_API_KEY": "api.openai.com", "GEMINI_API_KEY": "generativelanguage.googleapis.com",
+                "OPENROUTER_API_KEY": "openrouter.ai", "GROQ_API_KEY": "api.groq.com",
+                "ANTHROPIC_API_KEY": "api.anthropic.com"}
+
+
+def _route_url(spec):
+    """The service URL of an "openai:<url>#<model>" route, or ""."""
+    if not spec.startswith("openai:"):
+        return ""
+    return spec[len("openai:"):].split("#", 1)[0]
+
+
+def _vendor_key_for(spec):
+    """The vendor key whose host this route really points at: the parsed hostname must equal the vendor's and the
+    scheme must be https, so "https://evil.example/api.openai.com/v1" never receives the OpenAI key."""
+    from urllib.parse import urlparse
+    try:
+        u = urlparse(_route_url(spec))
+    except ValueError:
+        return None
+    if u.scheme != "https":
+        return None
+    for envname, host in VENDOR_HOSTS.items():
+        if u.hostname == host:
+            return envname
+    return None
+
+
+def _route_parts(spec):
+    """The service specs in a route: "openai:...", or "*=openai:...; zh,en=elevenlabs:..." per-language lists."""
+    for part in (spec or "").split(";"):
+        part = part.strip()
+        if "=" in part and ":" not in part.split("=", 1)[0]:
+            part = part.split("=", 1)[1].strip()
+        if part:
+            yield part
+
+
 def keys_for(translator, voices, recognizer):
-    """Hand the engine exactly the keys its chosen services need, under the names it reads."""
+    """Hand the engine exactly the keys its chosen services need, under the names it reads -- nothing else."""
     env = {}
-    for spec, target in ((translator, "LIVE_TRANSLATE_API_KEY"), (voices, "LIVE_TRANSLATE_TTS_KEY"),
-                         (recognizer, "LIVE_TRANSLATE_STT_KEY")):
-        spec = spec or ""
-        for envname, _label, *_ in SUBSCRIPTIONS:
-            host = {"OPENAI_API_KEY": "api.openai.com", "GEMINI_API_KEY": "generativelanguage.googleapis.com",
-                    "OPENROUTER_API_KEY": "openrouter.ai", "GROQ_API_KEY": "api.groq.com",
-                    "ANTHROPIC_API_KEY": "api.anthropic.com"}.get(envname)
-            if host and host in spec and _secret(envname):
-                env[target] = _secret(envname)
-        if "elevenlabs:" in spec and _secret("ELEVENLABS_API_KEY"):
-            env["ELEVENLABS_API_KEY"] = _secret("ELEVENLABS_API_KEY")
+    for route, target in ((translator, "LIVE_TRANSLATE_API_KEY"), (voices, "LIVE_TRANSLATE_TTS_KEY"),
+                          (recognizer, "LIVE_TRANSLATE_STT_KEY")):
+        for spec in _route_parts(route):
+            vendor = _vendor_key_for(spec)
+            if vendor and _secret(vendor):
+                env[target] = _secret(vendor)
+            elif _route_url(spec) and not vendor and _secret("LIVE_TRANSLATE_API_KEY"):
+                env[target] = _secret("LIVE_TRANSLATE_API_KEY")   # the user's own OpenAI-compatible service
+            if spec.startswith("elevenlabs:") and _secret("ELEVENLABS_API_KEY"):
+                env["ELEVENLABS_API_KEY"] = _secret("ELEVENLABS_API_KEY")
     return env

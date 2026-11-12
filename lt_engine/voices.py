@@ -18,6 +18,7 @@ A route is "zh,ja,ko=<spec>; *=<spec>": the first entry that lists the target la
 """
 from __future__ import annotations
 
+import atexit
 import json
 import os
 import shlex
@@ -202,6 +203,18 @@ class ElevenLabsVoice(Voice):
     def __init__(self, model="eleven_flash_v2_5"):
         self.model, self.voice_id, self.ref = model or "eleven_flash_v2_5", None, None
         self.name = f"elevenlabs:{self.model}"
+        _OPEN.append(self)                                  # deleted from the account when the engine stops
+
+    def close(self):
+        """Delete the voice this session cloned in the user's ElevenLabs account (they are permanent otherwise)."""
+        vid, self.voice_id = self.voice_id, None
+        if not vid:
+            return
+        try:
+            req = urllib.request.Request(f"{self.API}/voices/{vid}", method="DELETE", headers={"xi-api-key": self._key()})
+            urllib.request.urlopen(req, timeout=20).close()
+        except Exception as e:                              # never block shutdown; say what is left behind
+            sys.stderr.write(f"elevenlabs: could not delete cloned voice {vid}: {e}\n")
 
     def _key(self):
         k = os.environ.get("ELEVENLABS_API_KEY")
@@ -219,6 +232,7 @@ class ElevenLabsVoice(Voice):
                  f'--{boundary}\r\nContent-Disposition: form-data; name="files"; filename="ref.wav"\r\n'
                  f'Content-Type: audio/wav\r\n\r\n']
         body = "".join(parts).encode() + buf.getvalue() + f"\r\n--{boundary}--\r\n".encode()
+        self.close()                                        # a new speaker replaces the previous clone
         req = urllib.request.Request(f"{self.API}/voices/add", body,
                                      {"xi-api-key": self._key(),
                                       "Content-Type": f"multipart/form-data; boundary={boundary}"})
@@ -236,6 +250,21 @@ class ElevenLabsVoice(Voice):
                 if not chunk:
                     return
                 yield np.frombuffer(chunk[: len(chunk) // 2 * 2], np.int16).astype(np.float32) / 32768.0
+
+
+_OPEN = []                                                  # cloud voices this engine created
+
+
+def close_all():
+    """Clean up anything a voice created outside this computer (ElevenLabs clones). Safe to call twice."""
+    while _OPEN:
+        try:
+            _OPEN.pop().close()
+        except Exception:
+            pass
+
+
+atexit.register(close_all)
 
 
 class CommandVoice(Voice):

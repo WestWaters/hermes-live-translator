@@ -40,3 +40,12 @@ def is_set_up() -> bool:
     if os.environ.get("LIVE_TRANSLATE_PYTHON"):
         return venv_python().exists()
     return venv_python().exists() and (data_dir() / "venv" / ".ready").exists()
+
+
+def child_env(extra=None, keys=None):
+    """A minimal environment for the engine and its helpers (see lt_engine/childenv.py): never the whole parent env."""
+    import sys
+    if str(HERE) not in sys.path:
+        sys.path.insert(0, str(HERE))
+    from lt_engine.childenv import minimal_env
+    return minimal_env(extra, keys)

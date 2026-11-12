@@ -58,12 +58,17 @@ def _not_here(ctx):
     nobody is at the computer, so starting is refused unless the user allowed it (catalog rule 12)."""
     if ctx is None or _cfg(ctx, "allow_remote_start", False):
         return ""
+    unknown = ("not started: this Hermes cannot say where the request came from (it needs a Hermes with "
+               "session_surface), and live translation opens this computer's microphone and speakers. Start it from "
+               "the CLI, TUI or Desktop of a current Hermes, or turn on 'Allow starting from chat apps'.")
+    if not hasattr(ctx, "session_surface"):                   # older Hermes: fail closed (catalog rule 12)
+        return unknown
     try:
         if hasattr(ctx, "current_cron_execution") and ctx.current_cron_execution() is not None:
             return "not started: a scheduled job cannot open this computer's microphone"
-        surface = ctx.session_surface() if hasattr(ctx, "session_surface") else ""
+        surface = ctx.session_surface()
     except Exception:
-        return ""
+        return unknown
     if surface not in LOCAL_SURFACES:
         return (f"not started: this request came from {surface}, and live translation uses the microphone and "
                 "speakers of the computer Hermes runs on. Start it there (CLI, TUI or Desktop), or turn on "
@@ -93,7 +98,7 @@ def make_handlers(ctx=None):
             inp, to_them = inp or found["call_in"], to_them or found["to_them"]
         r = SESSION.start(target, args.get("source_language"), inp, out,
                           args.get("voice_clone", _cfg(ctx, "voice_clone", True)),
-                          voices=vo, recognizer=rec, translator=mt, secrets={**_secrets(), **keys_for(mt, vo, rec)},
+                          voices=vo, recognizer=rec, translator=mt, secrets=keys_for(mt, vo, rec),
                           two_way=mode == "call", to_them=to_them, play=mode != "stream", obs=mode == "stream")
         if r.get("ok"):
             r["mode"] = mode
@@ -138,12 +143,24 @@ def _actions(ctx=None):
     ctx = ctx or _CTX
 
     def start(b):
+        # The window (a local web page) may only pick what detect_models() found or a preset. Custom routes --
+        # command:/worker: voices, arbitrary service URLs -- come from the plugin's own config, never a request.
+        found = detect_models(hermes_llm=can_use_hermes_llm(ctx))
+        allowed = {kind: {m["id"] for m in found.get(kind, [])} for kind in ("translator", "voices", "recognizer")}
+        allowed["voices"] |= {"commercial", "best"}
+        allowed["recognizer"] |= {"auto"}
+        allowed["translator"] |= {""}
+        for kind in ("translator", "voices", "recognizer"):
+            v = b.get(kind)
+            if v is not None and v not in allowed[kind]:
+                return {"ok": False, "error": f"{kind} {v!r} is not one of the models found on this computer; "
+                                              "custom routes are set in the plugin's settings"}
         rec = b.get("recognizer") or _cfg(ctx, "recognizer", "auto") or None
         mt = b.get("translator") if b.get("translator") is not None else (_cfg(ctx, "translator", "") or None)
         vo = b.get("voices") or None
         return SESSION.start(b.get("target_language") or "en", b.get("source_language"), b.get("input_device"),
                              b.get("output_device"), b.get("voice_clone", True), voices=vo, recognizer=rec,
-                             translator=mt or None, secrets={**_secrets(), **keys_for(mt, vo, rec)},
+                             translator=mt or None, secrets=keys_for(mt, vo, rec),
                              two_way=bool(b.get("two_way")), my_mic=b.get("my_mic"), to_them=b.get("to_them"),
                              volume=b.get("volume", getattr(SESSION, "volume", None)))
 
@@ -160,4 +177,5 @@ def _actions(ctx=None):
 def open_window():
     """Start the local server (if needed) and return the control window URL."""
     SESSION._overlay()
-    return (SESSION.overlay_url or "").rstrip("/") + "/app"
+    from .server import TOKEN
+    return (SESSION.overlay_url or "").rstrip("/") + "/app#t=" + TOKEN     # the token travels in the fragment only

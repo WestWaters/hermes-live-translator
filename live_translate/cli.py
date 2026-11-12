@@ -8,7 +8,7 @@ import time
 from .detect import languages
 from .handlers import make_handlers, open_window
 from .install import setup
-from .paths import HERE, is_set_up, venv_python
+from .paths import HERE, is_set_up, venv_python, child_env
 from .session import SESSION
 
 
@@ -110,7 +110,7 @@ def _cli(args):
             print("run `hermes translate setup` first")
             return
         out = subprocess.run([str(venv_python()), "-m", "lt_engine", "--list-devices"], cwd=str(HERE),
-                             env=dict(os.environ, PYTHONPATH=str(HERE)), capture_output=True, text=True).stdout
+                             env=child_env({"PYTHONPATH": str(HERE)}), capture_output=True, text=True).stdout
         for d in json.loads(out)["devices"]:
             kind = "in " if d["inputs"] else "   "
             kind += "out" if d["outputs"] else ""
