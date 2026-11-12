@@ -62,7 +62,8 @@ class MLXTranslator(_Base):
         super().__init__()
         from mlx_lm import load
         from mlx_lm.sample_utils import make_sampler
-        self.model, self.tok = load(repo)
+        from .pins import local
+        self.model, self.tok = load(local(repo))
         self.sampler = make_sampler(temp=0.0)
 
     def _complete(self, msgs, max_tokens):
@@ -100,8 +101,9 @@ class GGUFTranslator(_Base):
         from .hw import detect
         import os
         threads = int(os.environ.get("LIVE_TRANSLATE_THREADS", "0") or 0) or None
-        self.llm = Llama.from_pretrained(repo, filename=filename, n_ctx=4096, verbose=False, n_threads=threads,
-                                         n_gpu_layers=-1 if detect() == "cuda" else 0)
+        from .pins import local
+        self.llm = Llama(model_path=local(repo, filename), n_ctx=4096, verbose=False, n_threads=threads,
+                         n_gpu_layers=-1 if detect() == "cuda" else 0)
 
     def _complete(self, msgs, max_tokens):
         p = "".join(f"<|im_start|>{m['role']}\n{m['content']}<|im_end|>\n" for m in msgs)
@@ -118,8 +120,10 @@ class TorchTranslator(_Base):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
         self.torch = torch
-        self.tok = AutoTokenizer.from_pretrained(repo)
-        self.model = AutoModelForCausalLM.from_pretrained(repo, dtype=torch.bfloat16, device_map="cuda").eval()
+        from .pins import local
+        path = local(repo)
+        self.tok = AutoTokenizer.from_pretrained(path)
+        self.model = AutoModelForCausalLM.from_pretrained(path, dtype=torch.bfloat16, device_map="cuda").eval()
 
     def _complete(self, msgs, max_tokens):
         ids = self.tok.apply_chat_template(msgs, add_generation_prompt=True, enable_thinking=False,

@@ -14,7 +14,8 @@ def load():
     limit_threads()
     from qwen_tts import Qwen3TTSModel
     dev = device()
-    m = Qwen3TTSModel.from_pretrained(REPO, device_map=dev, dtype=dtype(dev))
+    from lt_engine.pins import local
+    m = Qwen3TTSModel.from_pretrained(local(REPO), device_map=dev, dtype=dtype(dev))
     m.lt_prompt = None
     return m
 

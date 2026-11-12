@@ -11,7 +11,8 @@ def load():
     from lt_engine.workers._common import limit_threads
     limit_threads()
     from chatterbox.mtl_tts import ChatterboxMultilingualTTS
-    return ChatterboxMultilingualTTS.from_pretrained(device=device().split(":")[0])
+    from lt_engine.pins import local                       # the pinned checkpoint, loaded from the cache
+    return ChatterboxMultilingualTTS.from_local(local("ResembleAI/chatterbox"), device().split(":")[0])
 
 
 def ref(m, audio, sr, text):

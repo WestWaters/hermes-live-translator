@@ -110,7 +110,8 @@ def _cli(args):
             print("run `hermes translate setup` first")
             return
         out = subprocess.run([str(venv_python()), "-m", "lt_engine", "--list-devices"], cwd=str(HERE),
-                             env=child_env({"PYTHONPATH": str(HERE)}), capture_output=True, text=True).stdout
+                             env=child_env({"PYTHONPATH": str(HERE), "PYTHONUTF8": "1"}), capture_output=True, text=True,
+                             encoding="utf-8", errors="replace").stdout
         for d in json.loads(out)["devices"]:
             kind = "in " if d["inputs"] else "   "
             kind += "out" if d["outputs"] else ""

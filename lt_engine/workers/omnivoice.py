@@ -18,7 +18,8 @@ def load():
     import torch
     from omnivoice import OmniVoice
     dev = device()
-    m = OmniVoice.from_pretrained(REPO, device_map=dev, dtype=torch.float16 if dev.startswith("cuda") else torch.float32)
+    from lt_engine.pins import local
+    m = OmniVoice.from_pretrained(local(REPO), device_map=dev, dtype=torch.float16 if dev.startswith("cuda") else torch.float32)
     m.lt_prompt, m.lt_gender = None, None
     return m
 

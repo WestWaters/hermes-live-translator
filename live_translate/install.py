@@ -92,14 +92,25 @@ def _pip(uv, env_dir, args):
     else:
         subprocess.run([str(_py(env_dir)), "-m", "pip", "install"] + args, check=True)
 
+def _pins():
+    import sys as _s
+    if str(HERE) not in _s.path:
+        _s.path.insert(0, str(HERE))
+    from lt_engine import pins
+    return pins
+
+
 def _fetch(env_dir, repos, log):
     """Download models into the Hugging Face cache. "repo#file" fetches one file (a GGUF repo holds every
     quantization -- only the one the engine uses is downloaded)."""
     for item in repos:
         repo, _, filename = item.partition("#")
         log(f"downloading {repo}" + (f" ({filename})" if filename else ""))
-        code = (f"from huggingface_hub import hf_hub_download; hf_hub_download({repo!r}, {filename!r})" if filename
-                else f"from huggingface_hub import snapshot_download; snapshot_download({repo!r})")
+        rev = _pins().REVISIONS.get(repo)                  # the exact commit the engine will load
+        code = (f"from huggingface_hub import hf_hub_download; hf_hub_download({repo!r}, {filename!r}, revision={rev!r})"
+                if filename else f"from huggingface_hub import snapshot_download; snapshot_download({repo!r}, revision={rev!r})")
+        if repo in _pins().LIBRARY_RESOLVED:               # a library loads this one by name: cache its default too
+            code += f"; snapshot_download({repo!r})"
         subprocess.run([str(_py(env_dir)), "-c", code], check=True)
 
 
@@ -164,7 +175,7 @@ def _setup(log, download_models):
     if download_models:
         _fetch(venv, ["csukuangfj/speaker-embedding-models#3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx"], log)
         _fetch(venv, [r for r, _ in MODELS] if backend == "mlx" else
-               [("openai/whisper-large-v3-turbo" if _win_arm() else "mobiuslabsgmbh/faster-whisper-large-v3-turbo")
+               [("openai/whisper-large-v3-turbo" if _win_arm() else "dropbox-dash/faster-whisper-large-v3-turbo")
                 if backend == "cuda" else "Systran/faster-whisper-small",
                 "Qwen/Qwen3.5-4B" if torch_mt else "unsloth/Qwen3.5-4B-GGUF#Qwen3.5-4B-Q4_K_M.gguf"], log)
         if backend == "cpu":                                # Kokoro: the CPU's natural voices (8 languages)
@@ -178,7 +189,7 @@ def _setup(log, download_models):
             _pip(uv, d, [TORCH, TORCHAUDIO] + _torch_args(backend))
             if _win_arm():                                 # soxr has no win_arm64 wheel: use the scipy stand-in
                 over = d / "overrides.txt"
-                over.write_text("soxr; sys_platform == 'never'\n")
+                over.write_text("soxr; sys_platform == 'never'\n", encoding="utf-8")
                 _pip(uv, d, pkgs + ["scipy>=1.11,<2", "--override", str(over)])
                 site = d / "Lib" / "site-packages"
                 shutil.copy(HERE / "live_translate" / "compat" / "soxr.py", site / "soxr.py")
@@ -188,6 +199,6 @@ def _setup(log, download_models):
                 if backend == "cpu" and name == "qwen-tts":
                     repos = ["Qwen/Qwen3-TTS-12Hz-0.6B-Base"]
                 _fetch(d, repos, log)
-    (venv / ".ready").write_text(f"{backend} {time.strftime('%Y-%m-%d %H:%M')}")
+    (venv / ".ready").write_text(f"{backend} {time.strftime('%Y-%m-%d %H:%M')}", encoding="utf-8")
     log("live-translate is ready: `hermes translate start --to <language>` or /translate <language>")
     return True

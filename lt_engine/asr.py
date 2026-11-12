@@ -38,7 +38,8 @@ WHISPER_MODEL = "mlx-community/whisper-large-v3-turbo"
 class Qwen:
     def __init__(self, model=QWEN_MODEL):
         from mlx_audio.stt.utils import load_model
-        self.m = load_model(model)
+        from .pins import local
+        self.m = load_model(local(model))
 
     def transcribe(self, audio, lang=None):
         import mlx.core as mx
@@ -54,7 +55,8 @@ class Whisper:
 
     def transcribe(self, audio, lang=None):
         import mlx_whisper
-        r = mlx_whisper.transcribe(audio.astype(np.float32), path_or_hf_repo=self.model, language=lang,
+        from .pins import local
+        r = mlx_whisper.transcribe(audio.astype(np.float32), path_or_hf_repo=local(self.model), language=lang,
                                    temperature=0.0, condition_on_previous_text=False, verbose=None,
                                    initial_prompt=PROMPTS.get(lang))
         return r["text"].strip(), r.get("language", lang)
@@ -65,7 +67,8 @@ class Whisper:
         from mlx_whisper.audio import N_SAMPLES, log_mel_spectrogram, pad_or_trim
         from mlx_whisper.load_models import load_model
         if not hasattr(self, "_m"):
-            self._m = load_model(self.model)
+            from .pins import local
+            self._m = load_model(local(self.model))
         mel = log_mel_spectrogram(pad_or_trim(mx.array(audio.astype(np.float32)), N_SAMPLES),
                                   n_mels=self._m.dims.n_mels)
         _, probs = self._m.detect_language(mel)
@@ -84,7 +87,9 @@ class FasterWhisper:
         threads = int(os.environ.get("LIVE_TRANSLATE_THREADS", "0") or 0)
         # CPU: "small" -- measured on a desktop CPU it writes the same text as turbo 4x faster (1.25 s vs 5.1 s
         # for a 4 s phrase) with the language still identified; "base" is faster again but makes mistakes.
-        self.m = WhisperModel(model or ("turbo" if gpu else "small"), device="cuda" if gpu else "cpu",
+        from .pins import local                             # pinned CTranslate2 conversions, by repo
+        name = model or ("dropbox-dash/faster-whisper-large-v3-turbo" if gpu else "Systran/faster-whisper-small")
+        self.m = WhisperModel(local(name) if "/" in name else name, device="cuda" if gpu else "cpu",
                               compute_type="float16" if gpu else "int8", cpu_threads=threads)
 
     def transcribe(self, audio, lang=None):
@@ -108,8 +113,10 @@ class TorchWhisper:
         self.torch = torch
         self.dev = "cuda" if torch.cuda.is_available() else "cpu"
         self.dtype = torch.float16 if self.dev == "cuda" else torch.float32
-        self.p = WhisperProcessor.from_pretrained(model or self.MODEL)
-        self.m = WhisperForConditionalGeneration.from_pretrained(model or self.MODEL, dtype=self.dtype).to(self.dev).eval()
+        from .pins import local
+        path = local(model or self.MODEL)
+        self.p = WhisperProcessor.from_pretrained(path)
+        self.m = WhisperForConditionalGeneration.from_pretrained(path, dtype=self.dtype).to(self.dev).eval()
         gc = self.m.generation_config
         self.langs = {tok.strip("<|>"): i for tok, i in gc.lang_to_id.items()}
 
@@ -156,7 +163,8 @@ class MLXAudioSTT:
 
     def __init__(self, repo):
         from mlx_audio.stt.utils import load_model
-        self.m = load_model(repo)
+        from .pins import local
+        self.m = load_model(local(repo))
 
     def transcribe(self, audio, lang=None):
         import inspect

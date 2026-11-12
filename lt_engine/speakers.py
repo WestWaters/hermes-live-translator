@@ -29,8 +29,8 @@ class SpeakerTracker:
         self.counts = []
         try:
             import sherpa_onnx
-            from huggingface_hub import hf_hub_download
-            path = hf_hub_download(REPO, MODEL)
+            from .pins import local
+            path = local(REPO, MODEL)
             self.ex = sherpa_onnx.SpeakerEmbeddingExtractor(
                 sherpa_onnx.SpeakerEmbeddingExtractorConfig(model=path, num_threads=threads))
         except Exception:                                          # noqa: BLE001 -- optional: one speaker

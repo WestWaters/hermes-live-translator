@@ -13,14 +13,14 @@ def _file():
 
 def load():
     try:
-        return json.loads(_file().read_text())
+        return json.loads(_file().read_text(encoding="utf-8"))
     except Exception:
         return {"enabled": False, "host": "127.0.0.1", "port": 4455, "password": ""}
 
 
 def save(cfg):
     f = _file()
-    f.write_text(json.dumps(cfg))
+    f.write_text(json.dumps(cfg), encoding="utf-8")
     try:
         os.chmod(f, 0o600)
     except OSError:

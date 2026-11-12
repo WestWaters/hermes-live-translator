@@ -37,9 +37,10 @@ class WorkerVoice:
         if self.proc is None or self.proc.poll() is not None:
             here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             from .childenv import minimal_env                     # voice workers need no keys at all
-            env = minimal_env({"PYTHONPATH": here + os.pathsep + os.environ.get("PYTHONPATH", ""), "PYTHONUNBUFFERED": "1"})
+            env = minimal_env({"PYTHONPATH": here + os.pathsep + os.environ.get("PYTHONPATH", ""), "PYTHONUNBUFFERED": "1",
+                               "PYTHONUTF8": "1"})
             self.proc = subprocess.Popen(self.command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                         stderr=sys.stderr, text=True, bufsize=1, env=env)
+                                         stderr=sys.stderr, text=True, bufsize=1, encoding="utf-8", errors="replace", env=env)
             ready = json.loads(self.proc.stdout.readline() or "{}")
             if not ready.get("ok"):
                 raise RuntimeError(f"voice worker {self.name} failed to start: {ready.get('error')}")

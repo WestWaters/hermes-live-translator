@@ -119,7 +119,8 @@ class MLXAudioVoice(Voice):
         if self.m is None:
             if self.repo not in _LOADED:                           # one copy per model, shared by both lanes
                 from mlx_audio.tts.utils import load_model
-                _LOADED[self.repo] = load_model(self.repo)
+                from .pins import local
+                _LOADED[self.repo] = load_model(local(self.repo))
             self.m = _LOADED[self.repo]
             self.kind = type(self.m).__module__.split(".")[-2]      # e.g. qwen3_tts, chatterbox, omnivoice
         return self.m
@@ -301,13 +302,13 @@ class KokoroVoice(Voice):
     def _model(self):
         if self.k is None:
             import onnxruntime as ort
-            from huggingface_hub import hf_hub_download
             from kokoro_onnx import Kokoro
-            model = hf_hub_download(self.REPO, "onnx/model_quantized.onnx")
+            from .pins import local
+            model = local(self.REPO, "onnx/model_quantized.onnx")
             npz = os.path.join(os.path.dirname(model), "lt-voices.npz")
             if not os.path.exists(npz):                           # the per-voice files, packed as kokoro-onnx wants
                 names = sorted({v for pair in self.VOICES.values() for v in pair})
-                np.savez(npz, **{v: np.fromfile(hf_hub_download(self.REPO, f"voices/{v}.bin"), np.float32)
+                np.savez(npz, **{v: np.fromfile(local(self.REPO, f"voices/{v}.bin"), np.float32)
                                  .reshape(-1, 1, 256) for v in names})
             so = ort.SessionOptions()
             so.intra_op_num_threads = int(os.environ.get("LIVE_TRANSLATE_THREADS", "0") or 0)

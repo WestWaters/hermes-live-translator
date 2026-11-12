@@ -69,7 +69,7 @@ def _token():
     from .paths import data_dir
     f = data_dir() / "server.token"
     try:
-        t = f.read_text().strip()
+        t = f.read_text(encoding="utf-8").strip()
         if len(t) >= 32:
             return t
     except OSError:
@@ -95,7 +95,7 @@ def _app_page():
     from lt_engine import langs
     rows = [[c, n, 1 if (c in langs.FAST_CLONE or c in langs.CLONE_LANGS) else 0]
             for c, n in sorted(langs.NAMES.items(), key=lambda kv: kv[1])]
-    return APP.read_text().replace("__LANGS__", json.dumps(rows, ensure_ascii=False))   # token: URL fragment only
+    return APP.read_text(encoding="utf-8").replace("__LANGS__", json.dumps(rows, ensure_ascii=False))   # token: URL fragment only
 
 
 def serve(session, port=7865, actions=None):

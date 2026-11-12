@@ -96,14 +96,14 @@ class Session:
         sessions = data_dir() / "sessions"
         sessions.mkdir(exist_ok=True)
         self.log_path = sessions / time.strftime("%Y%m%d-%H%M%S.jsonl")
-        env = child_env({"PYTHONPATH": str(HERE), "PYTHONUNBUFFERED": "1",          # minimal env + only the keys
+        env = child_env({"PYTHONPATH": str(HERE), "PYTHONUNBUFFERED": "1", "PYTHONUTF8": "1",  # UTF-8 both ends
                          "LIVE_TRANSLATE_ENVS": os.environ.get("LIVE_TRANSLATE_ENVS", str(data_dir() / "envs"))},
                         keys=secrets)                                              # the selected services need
         flags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0   # lets stop() send Ctrl-Break
         self.proc = subprocess.Popen(cmd, cwd=str(HERE), env=env, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
                                      creationflags=flags,
-                                     stderr=open(data_dir() / "engine.log", "a"), text=True, bufsize=1,
-                                     encoding="utf-8")
+                                     stderr=open(data_dir() / "engine.log", "a", encoding="utf-8"), text=True, bufsize=1,
+                                     encoding="utf-8", errors="replace")
         self.captions.clear()
         self.lags = []
         try:
@@ -118,7 +118,7 @@ class Session:
 
     def _read(self):
         st = self.state
-        with open(self.log_path, "a") as log:
+        with open(self.log_path, "a", encoding="utf-8") as log:
             for line in self.proc.stdout:
                 log.write(line)
                 try:
@@ -159,7 +159,7 @@ class Session:
             if code not in (0, None) or reason:
                 tail = ""
                 try:
-                    tail = (data_dir() / "engine.log").read_text()[-300:].strip().splitlines()[-1]
+                    tail = (data_dir() / "engine.log").read_text(encoding="utf-8", errors="replace")[-300:].strip().splitlines()[-1]
                 except Exception:
                     pass
                 st.to("error", reason or f"engine exited ({code}): {tail}")
@@ -218,7 +218,8 @@ def devices():
     if not is_set_up():
         return {"devices": []}
     out = subprocess.run([str(venv_python()), "-m", "lt_engine", "--list-devices"], cwd=str(HERE),
-                         env=child_env({"PYTHONPATH": str(HERE)}), capture_output=True, text=True, timeout=60).stdout
+                         env=child_env({"PYTHONPATH": str(HERE), "PYTHONUTF8": "1"}), capture_output=True, text=True,
+                         encoding="utf-8", errors="replace", timeout=60).stdout
     return json.loads(out.strip().splitlines()[-1]) if out.strip() else {"devices": []}
 
 
