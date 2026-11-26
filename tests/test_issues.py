@@ -37,6 +37,8 @@ def test_worker_error_names_the_root_cause():
 
 
 def test_a_worker_that_fails_to_load_reports_the_cause(monkeypatch, capsys):
+    # the plugin's CI has no engine audio stack: serve() imports soundfile first, and a failed load never touches it
+    monkeypatch.setitem(sys.modules, "soundfile", types.ModuleType("soundfile"))
     monkeypatch.setattr(sys, "stdin", io.StringIO(""))
     worker.serve(_wrapped, None, None)
     line = json.loads(capsys.readouterr().out.strip())
