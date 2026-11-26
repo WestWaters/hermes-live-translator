@@ -157,7 +157,8 @@ def _actions(ctx=None):
                                               "custom routes are set in the plugin's settings"}
         rec = b.get("recognizer") or _cfg(ctx, "recognizer", "auto") or None
         mt = b.get("translator") if b.get("translator") is not None else (_cfg(ctx, "translator", "") or None)
-        vo = b.get("voices") or None
+        # the window's pick wins; else the plugin's own `voices` setting, as on the tool/CLI path (issue #2)
+        vo = b.get("voices") or _cfg(ctx, "voices", "commercial") or None
         return SESSION.start(b.get("target_language") or "en", b.get("source_language"), b.get("input_device"),
                              b.get("output_device"), b.get("voice_clone", True), voices=vo, recognizer=rec,
                              translator=mt or None, secrets=keys_for(mt, vo, rec),

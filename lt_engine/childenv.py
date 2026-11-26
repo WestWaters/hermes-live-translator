@@ -5,9 +5,11 @@ import os
 KEEP = {
     # processes, paths and temp
     "PATH", "HOME", "USER", "LOGNAME", "SHELL", "TMPDIR", "TEMP", "TMP",
-    # Windows: the OS, the user profile, and what platform.machine() reads
+    # Windows: the OS, the user profile, and what platform.machine() reads. USERNAME: Windows has no USER/LOGNAME, and
+    # without one of them getpass.getuser() (huggingface_hub calls it) falls through to `import pwd`, which Windows
+    # lacks -- the voice workers then died with transformers' "Could not import module 'AutoModel'" (issue #1)
     "SYSTEMROOT", "SystemRoot", "WINDIR", "SYSTEMDRIVE", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "PROGRAMDATA",
-    "PROGRAMFILES", "COMSPEC", "PATHEXT", "NUMBER_OF_PROCESSORS", "PROCESSOR_ARCHITECTURE", "PROCESSOR_IDENTIFIER",
+    "USERNAME", "PROGRAMFILES", "COMSPEC", "PATHEXT", "NUMBER_OF_PROCESSORS", "PROCESSOR_ARCHITECTURE", "PROCESSOR_IDENTIFIER",
     # locale and text
     "LANG", "LANGUAGE", "LC_ALL", "LC_CTYPE", "PYTHONUTF8", "PYTHONIOENCODING",
     # audio on Linux (PulseAudio / PipeWire) and GPU selection

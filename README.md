@@ -117,6 +117,17 @@ Measured on the smallest Apple Silicon machine, an M4 Mac mini with 16 GB, on re
 | First audio, cloned voice | ≈0.5 s |
 | Stop | ≈1 s |
 
+**GPUs with 12 GB or less:** the default NVIDIA voices share the card with recognition and translation and can fill it.
+Route the voices Kokoro covers to the CPU and keep the GPU for the rest:
+
+```bash
+hermes config set plugins.entries.live-translate.settings.voices "en,es,fr,hi,it,pt,ja,zh=kokoro; *=system"
+```
+
+On an RTX 3060 12 GB this took a French voice from 15–55 s per phrase to 0.5–1.9 s, with a ≈4 s median lag and the
+GPU at 7.4 GB instead of 11.9 GB (measured by [@Pascal83b](https://github.com/Pascal83b)). The setting applies to
+sessions started from the app and from Hermes alike.
+
 ## Privacy and disclosures
 
 What Live Translate does on your computer, before you install it:

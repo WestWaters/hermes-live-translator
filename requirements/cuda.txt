@@ -10,5 +10,7 @@ huggingface_hub>=0.30,<3
 nvidia-cublas-cu12>=12.4,<13; platform_machine == 'x86_64' or platform_machine == 'AMD64'
 nvidia-cudnn-cu12>=9,<10; platform_machine == 'x86_64' or platform_machine == 'AMD64'
 sherpa-onnx>=2.0,<3     # who is speaking (speaker voiceprints), Apache-2.0
+kokoro-onnx>=0.4,<1      # CPU voices (Kokoro-82M, Apache-2.0; uses espeak-ng, GPL-3.0): on CUDA too, so a small GPU can
+                          # route voices to the CPU and keep VRAM for recognition + translation (issue #2)
 psutil>=5.9,<8              # memory guard on Windows/Linux, BSD-3
 livekit>=1.2,<2            # echo cancellation (WebRTC AEC3 + noise suppression), Apache-2.0

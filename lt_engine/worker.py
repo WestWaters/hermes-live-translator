@@ -85,6 +85,20 @@ class WorkerVoice:
         yield _read_wav(out)
 
 
+def _why(e):
+    """The error line a worker reports: the innermost cause first, then what it surfaced as. Libraries re-raise
+    (transformers' lazy imports turn `No module named 'pwd'` into "Could not import module 'AutoModel'"), and the
+    message that names the real problem is the one at the bottom of the chain (issue #1)."""
+    root, seen = e, {id(e)}
+    while (nxt := root.__cause__ or root.__context__) is not None and id(nxt) not in seen:
+        seen.add(id(nxt))
+        root = nxt
+    msg = f"{type(e).__name__}: {e}"
+    if root is not e:
+        msg = f"{type(root).__name__}: {root} (surfaced as {msg})"
+    return msg[:500]
+
+
 def serve(load, ref, say):
     """Worker side. `load()` builds the model; `ref(model, wav16k, sr, text)` stores the speaker's voice;
     `say(model, text, lang) -> (float32 audio, sample rate)`. Runs the line protocol on stdin/stdout."""
@@ -95,7 +109,7 @@ def serve(load, ref, say):
         out.write(json.dumps({"ok": True}) + "\n")
         out.flush()
     except Exception as e:                           # noqa: BLE001
-        out.write(json.dumps({"ok": False, "error": f"{type(e).__name__}: {e}"[:500]}) + "\n")
+        out.write(json.dumps({"ok": False, "error": _why(e)}) + "\n")
         out.flush()
         return
     for line in sys.stdin:
@@ -112,6 +126,6 @@ def serve(load, ref, say):
             else:
                 r = {"ok": False, "error": f"unknown op {m.get('op')}"}
         except Exception as e:                       # noqa: BLE001
-            r = {"ok": False, "error": f"{type(e).__name__}: {e}"[:500]}
+            r = {"ok": False, "error": _why(e)}
         out.write(json.dumps(r) + "\n")
         out.flush()
