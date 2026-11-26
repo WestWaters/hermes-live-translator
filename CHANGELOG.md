@@ -3,6 +3,19 @@
 All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Windows: voice workers failed to start with "Could not import module 'AutoModel'" because the worker environment
+  dropped `USERNAME` ([#1](https://github.com/WestWaters/hermes-live-translator/issues/1), reported by @Pascal83b).
+- Sessions started from the app ignored the plugin's `voices` setting, so custom voice routes only worked from
+  Hermes ([#2](https://github.com/WestWaters/hermes-live-translator/issues/2), reported by @Pascal83b).
+
+### Changed
+- A voice worker that fails reports the innermost cause first (e.g. `No module named 'pwd'`), not only what a library
+  re-raised it as.
+- NVIDIA installs include the Kokoro CPU voices, so GPUs with 12 GB or less can route voices to the CPU (README).
+
 ## [0.1.0] - 2026-11-11
 
 ### Added
